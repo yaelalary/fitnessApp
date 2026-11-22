@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import type { Exercise, Session, SessionEntry } from '@/domain/types'
-import { findById, moveItem, removeById, upsertById } from '@/domain/collections'
+import { cloneData, findById, moveItem, removeById, upsertById } from '@/domain/collections'
 import { createEntry, findLastEntry } from '@/domain/sessions'
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '@/services/sessionDrafts'
 import { useWorkoutStore } from '@/stores/workout'
@@ -11,7 +11,7 @@ export function useSessionEditor(sessionId: string) {
 
   const saved = computed(() => findById(workout.sessions, sessionId) ?? null)
   const initialDraft = loadSessionDraft(profileId, sessionId)
-  const session = ref<Session | null>(initialDraft ?? (saved.value ? structuredClone(saved.value) : null))
+  const session = ref<Session | null>(initialDraft ?? (saved.value ? cloneData(saved.value) : null))
   const hasUnsavedChanges = ref(initialDraft !== null)
 
   watch(

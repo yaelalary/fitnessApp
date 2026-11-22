@@ -26,3 +26,7 @@ export function moveItem<T>(list: readonly T[], fromIndex: number, toIndex: numb
 export function indexById<T extends Identified>(list: readonly T[]): Map<string, T> {
   return new Map(list.map((item) => [item.id, item]))
 }
+
+export function cloneData<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T
+}

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Exercise, ExerciseTargets, Routine } from '@/domain/types'
 import { createRoutine, createRoutineItem, validateRoutine, type RoutineField } from '@/domain/routines'
-import { findById, moveItem, removeById } from '@/domain/collections'
+import { cloneData, findById, moveItem, removeById } from '@/domain/collections'
 import { resolveImageSrc } from '@/domain/images'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { useWorkoutStore } from '@/stores/workout'
@@ -25,7 +25,7 @@ const { busy, error, run } = useAsyncAction()
 
 const existing = props.id === undefined ? null : (findById(workout.routines, props.id) ?? null)
 const notFound = props.id !== undefined && existing === null
-const draft = ref<Routine>(existing ? structuredClone(existing) : createRoutine())
+const draft = ref<Routine>(existing ? cloneData(existing) : createRoutine())
 const errors = ref<ValidationErrors<RoutineField>>({})
 const pickerOpen = ref(false)
 

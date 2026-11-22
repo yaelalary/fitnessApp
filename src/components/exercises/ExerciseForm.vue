@@ -6,6 +6,7 @@ import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
 import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineSuggestions } from '@/domain/machines'
 import { changeExerciseCategory, validateExercise, type ExerciseField } from '@/domain/exercises'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
+import { cloneData } from '@/domain/collections'
 import AppButton from '@/components/ui/AppButton.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
@@ -20,7 +21,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{ submit: [exercise: Exercise, image: ImageInput] }>()
 
-const draft = ref<Exercise>(structuredClone(props.exercise))
+const draft = ref<Exercise>(cloneData(props.exercise))
 const image = ref<ImageInput>({ kind: 'keep' })
 const errors = ref<ValidationErrors<ExerciseField>>({})
 const machineListId = useId()
