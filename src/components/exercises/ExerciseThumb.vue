@@ -13,6 +13,7 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
 
 <style scoped>
 .thumb {
+  position: relative;
   display: grid;
   place-items: center;
   flex: none;
@@ -23,8 +24,11 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
 }
 
 .thumb img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  padding: var(--space-1);
   object-fit: contain;
 }
 
