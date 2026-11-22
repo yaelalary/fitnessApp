@@ -1,0 +1,28 @@
+interface Identified {
+  id: string
+}
+
+export function upsertById<T extends Identified>(list: readonly T[], item: T): T[] {
+  const exists = list.some((current) => current.id === item.id)
+  return exists ? list.map((current) => (current.id === item.id ? item : current)) : [...list, item]
+}
+
+export function removeById<T extends Identified>(list: readonly T[], id: string): T[] {
+  return list.filter((item) => item.id !== id)
+}
+
+export function findById<T extends Identified>(list: readonly T[], id: string): T | undefined {
+  return list.find((item) => item.id === id)
+}
+
+export function moveItem<T>(list: readonly T[], fromIndex: number, toIndex: number): T[] {
+  if (toIndex < 0 || toIndex >= list.length || fromIndex === toIndex) return [...list]
+  const next = [...list]
+  const [moved] = next.splice(fromIndex, 1)
+  next.splice(toIndex, 0, moved)
+  return next
+}
+
+export function indexById<T extends Identified>(list: readonly T[]): Map<string, T> {
+  return new Map(list.map((item) => [item.id, item]))
+}

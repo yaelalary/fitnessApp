@@ -1,0 +1,71 @@
+import type { CategoryId, Exercise, ExerciseTargets } from './types'
+import { CATEGORIES, categoryOf } from './categories'
+import { BRANDS } from './machines'
+import { createId } from './ids'
+import { formatRest } from './dates'
+import { formatNumber } from './numbers'
+import { nonNegative, requiredText, type ValidationErrors } from './validation'
+
+export type ExerciseField = 'name' | 'sets' | 'reps' | 'restSeconds' | 'durationMinutes'
+
+export function createExercise(category: CategoryId = 'strength'): Exercise {
+  return {
+    id: createId(),
+    name: '',
+    category,
+    brand: null,
+    machine: '',
+    muscleGroup: '',
+    notes: '',
+    image: null,
+    defaults: { ...CATEGORIES[category].defaults },
+  }
+}
+
+export function changeExerciseCategory(exercise: Exercise, category: CategoryId): Exercise {
+  if (exercise.category === category) return exercise
+  return { ...exercise, category, defaults: { ...CATEGORIES[category].defaults } }
+}
+
+export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseField> {
+  const config = categoryOf(exercise.category)
+  const errors: ValidationErrors<ExerciseField> = {
+    name: requiredText(exercise.name, "Donne un nom à l'exercice."),
+  }
+  if (config.tracking === 'sets') {
+    errors.sets = exercise.defaults.sets < 1 ? 'Au moins une série.' : undefined
+    errors.reps = exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
+    errors.restSeconds = nonNegative(exercise.defaults.restSeconds, 'La récupération ne peut pas être négative.')
+  } else {
+    errors.durationMinutes = nonNegative(exercise.defaults.durationMinutes, 'La durée ne peut pas être négative.')
+  }
+  return errors
+}
+
+export function describeTargets(targets: ExerciseTargets, category: CategoryId): string {
+  const config = categoryOf(category)
+  if (config.tracking === 'duration') {
+    return targets.durationMinutes > 0 ? `${formatNumber(targets.durationMinutes)} min` : 'Durée libre'
+  }
+  const volume = `${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`
+  return config.usesRest && targets.restSeconds > 0 ? `${volume} · récup ${formatRest(targets.restSeconds)}` : volume
+}
+
+export function describeEquipment(exercise: Exercise): string {
+  const parts = [exercise.brand ? BRANDS[exercise.brand].label : '', exercise.machine, exercise.muscleGroup]
+  return parts.filter(Boolean).join(' · ')
+}
+
+export function sortExercises(exercises: readonly Exercise[]): Exercise[] {
+  return [...exercises].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+}
+
+export function filterExercises(exercises: readonly Exercise[], category: CategoryId | null, query: string): Exercise[] {
+  const needle = query.trim().toLocaleLowerCase('fr')
+  return sortExercises(exercises).filter((exercise) => {
+    if (category && exercise.category !== category) return false
+    if (!needle) return true
+    const haystack = `${exercise.name} ${exercise.machine} ${exercise.muscleGroup}`.toLocaleLowerCase('fr')
+    return haystack.includes(needle)
+  })
+}

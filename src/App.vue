@@ -1,0 +1,65 @@
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useSettingsStore } from '@/stores/settings'
+import { useWorkoutStore } from '@/stores/workout'
+import { useAsyncAction } from '@/composables/useAsyncAction'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import AppNav from '@/components/layout/AppNav.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import ErrorMessage from '@/components/ui/ErrorMessage.vue'
+import LoadingState from '@/components/ui/LoadingState.vue'
+import ProfileChooser from '@/components/profiles/ProfileChooser.vue'
+
+type Gate = 'loading' | 'error' | 'choose-profile' | 'content'
+
+const route = useRoute()
+const settings = useSettingsStore()
+const workout = useWorkoutStore()
+const creation = useAsyncAction()
+
+const gate = computed<Gate>(() => {
+  if (route.name === 'settings') return 'content'
+  if (workout.status === 'idle' || workout.status === 'loading') return 'loading'
+  if (workout.status === 'error') return 'error'
+  if (route.meta.requiresProfile && !workout.activeProfile) return 'choose-profile'
+  return 'content'
+})
+
+function createProfile(name: string) {
+  creation.run(() => workout.addProfile(name))
+}
+
+onMounted(() => workout.load())
+</script>
+
+<template>
+  <AppHeader
+    :profiles="workout.profiles"
+    :active-profile-id="workout.activeProfile?.id ?? null"
+    :synced="workout.storageKind === 'gist'"
+    @switch-profile="settings.setActiveProfile"
+  />
+  <main>
+    <div v-if="gate === 'loading'" class="page">
+      <LoadingState label="Chargement de tes séances…" />
+    </div>
+    <div v-else-if="gate === 'error'" class="page">
+      <ErrorMessage :message="workout.loadError ?? 'Chargement impossible.'" retry-label="Réessayer" @retry="workout.load" />
+      <AppButton :to="{ name: 'settings' }" icon="settings">Vérifier les réglages</AppButton>
+    </div>
+    <div v-else-if="gate === 'choose-profile'" class="page">
+      <ProfileChooser
+        :profiles="workout.profiles"
+        :busy="creation.busy.value"
+        :error="creation.error.value"
+        @select="settings.setActiveProfile"
+        @create="createProfile"
+      />
+    </div>
+    <RouterView v-else v-slot="{ Component, route: current }">
+      <component :is="Component" :key="`${workout.activeProfile?.id}:${current.path}`" />
+    </RouterView>
+  </main>
+  <AppNav />
+</template>
