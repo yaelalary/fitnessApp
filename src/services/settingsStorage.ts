@@ -1,3 +1,4 @@
+import { DEFAULT_GIST_ID } from '@/config'
 import { readJson, writeJson } from './browserStorage'
 
 export interface AppSettings {
@@ -8,10 +9,16 @@ export interface AppSettings {
 
 const SETTINGS_KEY = 'carnet-muscu:settings'
 
-const DEFAULT_SETTINGS: AppSettings = { gistId: '', token: '', activeProfileId: null }
+export function resolveSettings(stored: Partial<AppSettings>, defaultGistId: string): AppSettings {
+  return {
+    gistId: stored.gistId?.trim() || defaultGistId,
+    token: stored.token ?? '',
+    activeProfileId: stored.activeProfileId ?? null,
+  }
+}
 
 export function loadSettings(): AppSettings {
-  return { ...DEFAULT_SETTINGS, ...readJson<Partial<AppSettings>>(SETTINGS_KEY, {}) }
+  return resolveSettings(readJson<Partial<AppSettings>>(SETTINGS_KEY, {}), DEFAULT_GIST_ID)
 }
 
 export function saveSettings(settings: AppSettings): void {
