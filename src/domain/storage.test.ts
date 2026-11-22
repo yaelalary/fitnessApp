@@ -90,7 +90,7 @@ describe('normalizeProfile', () => {
       exercises: [{ id: 'e', name: 'Squat', category: 'inconnue', defaults: { sets: '4' } }],
       sessions: [{ id: 's', entries: [] }],
     })
-    expect(profile?.exercises[0]).toMatchObject({ category: 'strength', brand: null, image: null, defaults: { sets: 4, reps: 0 } })
+    expect(profile?.exercises[0]).toMatchObject({ category: 'strength', brand: null, image: null, defaults: { sets: 4, reps: 0, weightKg: 0 } })
     expect(profile?.routines).toEqual([])
     expect(profile?.sessions).toEqual([])
   })

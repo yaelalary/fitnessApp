@@ -24,7 +24,7 @@ export function findLastEntry(
 }
 
 function setsFromTargets(targets: ExerciseTargets): SetLog[] {
-  return Array.from({ length: targets.sets }, () => ({ reps: targets.reps, weightKg: 0, done: false }))
+  return Array.from({ length: targets.sets }, () => ({ reps: targets.reps, weightKg: targets.weightKg, done: false }))
 }
 
 function setsFromPrevious(previous: SessionEntry, targets: ExerciseTargets): SetLog[] {
@@ -151,6 +151,6 @@ export function exerciseFromEntry(entry: SessionEntry): Exercise {
     muscleGroup: '',
     notes: '',
     image: null,
-    defaults: { sets: entry.sets.length, reps: 0, restSeconds: entry.restSeconds, durationMinutes: entry.durationMinutes },
+    defaults: { sets: entry.sets.length, reps: 0, weightKg: 0, restSeconds: entry.restSeconds, durationMinutes: entry.durationMinutes },
   }
 }

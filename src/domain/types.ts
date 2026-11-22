@@ -5,6 +5,7 @@ export type BrandId = 'technogym' | 'hammer-strength' | 'free-weights' | 'other'
 export interface ExerciseTargets {
   sets: number
   reps: number
+  weightKg: number
   restSeconds: number
   durationMinutes: number
 }

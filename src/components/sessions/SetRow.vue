@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { SetLog } from '@/domain/types'
-import type { CategoryConfig } from '@/domain/categories'
+import { WEIGHT_STEP_KG, type CategoryConfig } from '@/domain/categories'
 import AppButton from '@/components/ui/AppButton.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
-
-const WEIGHT_STEP_KG = 2.5
 
 defineProps<{ set: SetLog; index: number; config: CategoryConfig }>()
 defineEmits<{ update: [patch: Partial<SetLog>]; remove: [] }>()

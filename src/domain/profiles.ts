@@ -33,6 +33,7 @@ function normalizeTargets(value: unknown): ExerciseTargets {
   return {
     sets: toSafeNumber(raw.sets),
     reps: toSafeNumber(raw.reps),
+    weightKg: toSafeNumber(raw.weightKg),
     restSeconds: toSafeNumber(raw.restSeconds),
     durationMinutes: toSafeNumber(raw.durationMinutes),
   }

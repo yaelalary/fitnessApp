@@ -7,8 +7,8 @@ function exercise(id: string, overrides: Partial<Exercise> = {}): Exercise {
   return { ...createExercise('strength'), id, name: id, ...overrides }
 }
 
-const press = exercise('press', { defaults: { sets: 3, reps: 10, restSeconds: 90, durationMinutes: 0 } })
-const bike = exercise('bike', { category: 'cardio', defaults: { sets: 0, reps: 0, restSeconds: 0, durationMinutes: 15 } })
+const press = exercise('press', { defaults: { sets: 3, reps: 10, weightKg: 0, restSeconds: 90, durationMinutes: 0 } })
+const bike = exercise('bike', { category: 'cardio', defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 15 } })
 const exercisesById = new Map([press, bike].map((item) => [item.id, item]))
 
 const routine: Routine = {
@@ -17,7 +17,7 @@ const routine: Routine = {
   notes: '',
   items: [
     { id: 'i1', exerciseId: 'bike', targets: bike.defaults },
-    { id: 'i2', exerciseId: 'press', targets: { sets: 4, reps: 8, restSeconds: 120, durationMinutes: 0 } },
+    { id: 'i2', exerciseId: 'press', targets: { sets: 4, reps: 8, weightKg: 0, restSeconds: 120, durationMinutes: 0 } },
     { id: 'i3', exerciseId: 'deleted', targets: press.defaults },
   ],
 }
@@ -71,6 +71,15 @@ describe('createSessionFromRoutine', () => {
   it('utilise la durée cible pour le cardio sans historique', () => {
     expect(session.entries[0].durationMinutes).toBe(15)
     expect(session.entries[0].sets).toEqual([])
+  })
+})
+
+describe('charge par défaut', () => {
+  it('pré-remplit les séries avec la charge de l’exercice quand il n’y a pas d’historique', () => {
+    const heavy = { ...press, defaults: { ...press.defaults, weightKg: 50 } }
+    const single: Routine = { ...routine, items: [{ id: 'i', exerciseId: 'press', targets: heavy.defaults }] }
+    const session = createSessionFromRoutine(single, new Map([['press', heavy]]), [], '2026-11-22')
+    expect(session.entries[0].sets.map((set) => set.weightKg)).toEqual([50, 50, 50])
   })
 })
 

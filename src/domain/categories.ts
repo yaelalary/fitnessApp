@@ -31,7 +31,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesDistance: false,
     usesMachine: true,
     metrics: ['duration'],
-    defaults: { sets: 0, reps: 0, restSeconds: 0, durationMinutes: 10 },
+    defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 10 },
   },
   strength: {
     id: 'strength',
@@ -45,7 +45,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesDistance: false,
     usesMachine: true,
     metrics: ['maxWeight', 'estimatedOneRepMax', 'volume', 'totalReps', 'bestSetReps'],
-    defaults: { sets: 3, reps: 10, restSeconds: 90, durationMinutes: 0 },
+    defaults: { sets: 3, reps: 10, weightKg: 0, restSeconds: 90, durationMinutes: 0 },
   },
   cardio: {
     id: 'cardio',
@@ -59,7 +59,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesDistance: true,
     usesMachine: true,
     metrics: ['duration', 'distance', 'speed'],
-    defaults: { sets: 0, reps: 0, restSeconds: 0, durationMinutes: 20 },
+    defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 20 },
   },
   stretching: {
     id: 'stretching',
@@ -73,9 +73,12 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesDistance: false,
     usesMachine: false,
     metrics: ['totalHold'],
-    defaults: { sets: 2, reps: 30, restSeconds: 15, durationMinutes: 0 },
+    defaults: { sets: 2, reps: 30, weightKg: 0, restSeconds: 15, durationMinutes: 0 },
   },
 }
+
+export const WEIGHT_STEP_KG = 2.5
+export const REST_STEP_SECONDS = 15
 
 export const CATEGORY_ORDER: CategoryId[] = ['warmup', 'strength', 'cardio', 'stretching']
 

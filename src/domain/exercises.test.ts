@@ -7,10 +7,15 @@ import { hasErrors } from './validation'
 
 describe('validateExercise', () => {
   it('exige un nom et des séries pour la musculation', () => {
-    const exercise = { ...createExercise('strength'), defaults: { sets: 0, reps: 10, restSeconds: 60, durationMinutes: 0 } }
+    const exercise = { ...createExercise('strength'), defaults: { sets: 0, reps: 10, weightKg: 0, restSeconds: 60, durationMinutes: 0 } }
     const errors = validateExercise(exercise)
     expect(errors.name).toBeDefined()
     expect(errors.sets).toBeDefined()
+  })
+
+  it('refuse une charge négative', () => {
+    const exercise = { ...createExercise('strength'), name: 'Presse', defaults: { sets: 3, reps: 10, weightKg: -5, restSeconds: 60, durationMinutes: 0 } }
+    expect(validateExercise(exercise).weightKg).toBeDefined()
   })
 
   it('ne demande pas de séries pour le cardio', () => {
@@ -28,9 +33,12 @@ describe('changeExerciseCategory', () => {
 
 describe('describeTargets', () => {
   it('décrit séries et récupération', () => {
-    expect(describeTargets({ sets: 3, reps: 10, restSeconds: 90, durationMinutes: 0 }, 'strength')).toBe('3 × 10 · récup 1 min 30')
-    expect(describeTargets({ sets: 2, reps: 30, restSeconds: 0, durationMinutes: 0 }, 'stretching')).toBe('2 × 30 s')
-    expect(describeTargets({ sets: 0, reps: 0, restSeconds: 0, durationMinutes: 20 }, 'cardio')).toBe('20 min')
+    expect(describeTargets({ sets: 3, reps: 10, weightKg: 0, restSeconds: 90, durationMinutes: 0 }, 'strength')).toBe('3 × 10 · récup 1 min 30')
+    expect(describeTargets({ sets: 4, reps: 8, weightKg: 42.5, restSeconds: 120, durationMinutes: 0 }, 'strength')).toBe(
+      '4 × 8 · 42,5 kg · récup 2 min',
+    )
+    expect(describeTargets({ sets: 2, reps: 30, weightKg: 0, restSeconds: 0, durationMinutes: 0 }, 'stretching')).toBe('2 × 30 s')
+    expect(describeTargets({ sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 20 }, 'cardio')).toBe('20 min')
   })
 })
 

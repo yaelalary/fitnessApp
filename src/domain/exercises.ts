@@ -6,7 +6,7 @@ import { formatRest } from './dates'
 import { formatNumber } from './numbers'
 import { nonNegative, requiredText, type ValidationErrors } from './validation'
 
-export type ExerciseField = 'name' | 'sets' | 'reps' | 'restSeconds' | 'durationMinutes'
+export type ExerciseField = 'name' | 'sets' | 'reps' | 'weightKg' | 'restSeconds' | 'durationMinutes'
 
 export function createExercise(category: CategoryId = 'strength'): Exercise {
   return {
@@ -35,6 +35,7 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
   if (config.tracking === 'sets') {
     errors.sets = exercise.defaults.sets < 1 ? 'Au moins une série.' : undefined
     errors.reps = exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
+    errors.weightKg = nonNegative(exercise.defaults.weightKg, 'La charge ne peut pas être négative.')
     errors.restSeconds = nonNegative(exercise.defaults.restSeconds, 'La récupération ne peut pas être négative.')
   } else {
     errors.durationMinutes = nonNegative(exercise.defaults.durationMinutes, 'La durée ne peut pas être négative.')
@@ -47,8 +48,10 @@ export function describeTargets(targets: ExerciseTargets, category: CategoryId):
   if (config.tracking === 'duration') {
     return targets.durationMinutes > 0 ? `${formatNumber(targets.durationMinutes)} min` : 'Durée libre'
   }
-  const volume = `${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`
-  return config.usesRest && targets.restSeconds > 0 ? `${volume} · récup ${formatRest(targets.restSeconds)}` : volume
+  const parts = [`${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`]
+  if (config.usesWeight && targets.weightKg > 0) parts.push(`${formatNumber(targets.weightKg)} kg`)
+  if (config.usesRest && targets.restSeconds > 0) parts.push(`récup ${formatRest(targets.restSeconds)}`)
+  return parts.join(' · ')
 }
 
 export function describeEquipment(exercise: Exercise): string {

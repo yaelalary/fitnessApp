@@ -3,11 +3,9 @@ import { computed } from 'vue'
 import type { CategoryId, ExerciseTargets } from '@/domain/types'
 import type { ExerciseField } from '@/domain/exercises'
 import type { ValidationErrors } from '@/domain/validation'
-import { categoryOf } from '@/domain/categories'
+import { categoryOf, REST_STEP_SECONDS, WEIGHT_STEP_KG } from '@/domain/categories'
 import FormField from '@/components/ui/FormField.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
-
-const REST_STEP_SECONDS = 15
 
 const props = withDefaults(
   defineProps<{ targets: ExerciseTargets; category: CategoryId; errors?: ValidationErrors<ExerciseField> }>(),
@@ -47,6 +45,19 @@ function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[
         :max="600"
         :model-value="targets.reps"
         @update:model-value="update('reps', $event)"
+      />
+    </FormField>
+    <FormField v-if="config.usesWeight" v-slot="field" label="Charge" :error="errors.weightKg">
+      <NumberStepper
+        :id="field.id"
+        :described-by="field.describedBy"
+        :invalid="field.invalid"
+        label="la charge"
+        unit="kg"
+        :step="WEIGHT_STEP_KG"
+        :max="1000"
+        :model-value="targets.weightKg"
+        @update:model-value="update('weightKg', $event)"
       />
     </FormField>
     <FormField v-if="config.usesRest" v-slot="field" label="Récup" :error="errors.restSeconds">
