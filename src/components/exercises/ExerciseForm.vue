@@ -3,7 +3,7 @@ import { computed, ref, useId } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
-import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineSuggestions } from '@/domain/machines'
+import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl, machineSuggestions } from '@/domain/machines'
 import { changeExerciseCategory, validateExercise, type ExerciseField } from '@/domain/exercises'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { cloneData } from '@/domain/collections'
@@ -30,6 +30,9 @@ const muscleListId = useId()
 const categoryOptions: SegmentOption<CategoryId>[] = CATEGORY_ORDER.map((id) => ({ value: id, label: CATEGORIES[id].label }))
 const config = computed(() => categoryOf(draft.value.category))
 const machines = computed(() => machineSuggestions(draft.value.brand))
+const catalogImageSrc = computed(() =>
+  config.value.usesMachine ? machineImageUrl(draft.value.brand, draft.value.machine) : null,
+)
 
 function setCategory(category: CategoryId) {
   draft.value = changeExerciseCategory(draft.value, category)
@@ -92,7 +95,7 @@ function submit() {
 
     <section class="stack">
       <h2 class="section-title">Photo de la machine</h2>
-      <ImagePicker v-model="image" :current-src="imageSrc" :alt="draft.machine || draft.name" />
+      <ImagePicker v-model="image" :current-src="imageSrc" :fallback-src="catalogImageSrc" :alt="draft.machine || draft.name" />
     </section>
 
     <FormField v-slot="field" label="Notes" hint="Réglages du siège, prise, consignes…">

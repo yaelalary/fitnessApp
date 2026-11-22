@@ -1,84 +1,19 @@
 import type { BrandId } from './types'
+import { MACHINE_CATALOG, type MachineModel } from './machineCatalog'
+
+export type { MachineModel }
 
 export interface BrandConfig {
   id: BrandId
   label: string
-  machines: string[]
+  machines: MachineModel[]
 }
 
 export const BRANDS: Record<BrandId, BrandConfig> = {
-  technogym: {
-    id: 'technogym',
-    label: 'Technogym',
-    machines: [
-      'Chest Press',
-      'Pectoral',
-      'Shoulder Press',
-      'Lat Machine',
-      'Vertical Traction',
-      'Low Row',
-      'Upper Back',
-      'Delts Machine',
-      'Arm Curl',
-      'Arm Extension',
-      'Leg Press',
-      'Leg Extension',
-      'Leg Curl',
-      'Prone Leg Curl',
-      'Abductor',
-      'Adductor',
-      'Glute',
-      'Multi Hip',
-      'Abdominal Crunch',
-      'Lower Back',
-      'Rotary Torso',
-      'Cable Station',
-      'Run (tapis)',
-      'Bike',
-      'Recline',
-      'Synchro (elliptique)',
-      'Climb',
-      'Skillrow',
-    ],
-  },
-  'hammer-strength': {
-    id: 'hammer-strength',
-    label: 'Hammer Strength',
-    machines: [
-      'Iso-Lateral Bench Press',
-      'Iso-Lateral Incline Press',
-      'Iso-Lateral Decline Press',
-      'Iso-Lateral Wide Chest',
-      'Iso-Lateral Shoulder Press',
-      'Iso-Lateral Front Lat Pulldown',
-      'Iso-Lateral Row',
-      'Iso-Lateral High Row',
-      'Iso-Lateral Low Row',
-      'Iso-Lateral Leg Press',
-      'Iso-Lateral Leg Extension',
-      'Iso-Lateral Kneeling Leg Curl',
-      'Linear Leg Press',
-      'Linear Hack Press',
-      'V-Squat',
-      'Belt Squat',
-      'Seated Calf Raise',
-      'Standing Calf Raise',
-      'Hip Thrust',
-      'Ground Base Squat Lunge',
-      'Biceps Curl',
-      'Seated Dip',
-    ],
-  },
-  'free-weights': {
-    id: 'free-weights',
-    label: 'Poids libres',
-    machines: ['Barre olympique', 'Haltères', 'Kettlebell', 'Smith machine', 'Banc', 'Barre de traction', 'Poids du corps'],
-  },
-  other: {
-    id: 'other',
-    label: 'Autre',
-    machines: [],
-  },
+  technogym: { id: 'technogym', label: 'Technogym', machines: MACHINE_CATALOG.technogym },
+  'hammer-strength': { id: 'hammer-strength', label: 'Hammer Strength', machines: MACHINE_CATALOG['hammer-strength'] },
+  'free-weights': { id: 'free-weights', label: 'Poids libres', machines: MACHINE_CATALOG['free-weights'] },
+  other: { id: 'other', label: 'Autre', machines: MACHINE_CATALOG.other },
 }
 
 export const BRAND_ORDER: BrandId[] = ['technogym', 'hammer-strength', 'free-weights', 'other']
@@ -87,9 +22,30 @@ export function isBrandId(value: unknown): value is BrandId {
   return typeof value === 'string' && value in BRANDS
 }
 
+function machinesOf(brand: BrandId | null): MachineModel[] {
+  return brand ? BRANDS[brand].machines : BRAND_ORDER.flatMap((id) => BRANDS[id].machines)
+}
+
+function normalizeName(name: string): string {
+  return name.trim().toLocaleLowerCase('fr')
+}
+
 export function machineSuggestions(brand: BrandId | null): string[] {
-  if (brand) return BRANDS[brand].machines
-  return BRAND_ORDER.flatMap((id) => BRANDS[id].machines)
+  return machinesOf(brand).map((machine) => machine.name)
+}
+
+export function findMachine(brand: BrandId | null, name: string): MachineModel | null {
+  const wanted = normalizeName(name)
+  if (!wanted) return null
+  return (
+    machinesOf(brand).find((machine) =>
+      [machine.name, ...(machine.aliases ?? [])].some((candidate) => normalizeName(candidate) === wanted),
+    ) ?? null
+  )
+}
+
+export function machineImageUrl(brand: BrandId | null, name: string): string | null {
+  return findMachine(brand, name)?.imageUrl ?? null
 }
 
 export const MUSCLE_GROUPS = [

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import type { Exercise, ExerciseTargets, Routine } from '@/domain/types'
 import { createRoutine, createRoutineItem, validateRoutine, type RoutineField } from '@/domain/routines'
 import { cloneData, findById, moveItem, removeById } from '@/domain/collections'
-import { resolveImageSrc } from '@/domain/images'
+import { exerciseImageSrc } from '@/domain/images'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
@@ -34,7 +34,7 @@ const rows = computed(() =>
   draft.value.items.flatMap((item, index) => {
     const exercise = workout.exercisesById.get(item.exerciseId)
     if (!exercise) return []
-    return [{ item, index, exercise, imageSrc: resolveImageSrc(exercise.image, workout.images) }]
+    return [{ item, index, exercise, imageSrc: exerciseImageSrc(exercise, workout.images) }]
   }),
 )
 

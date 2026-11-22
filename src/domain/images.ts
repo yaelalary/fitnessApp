@@ -1,4 +1,5 @@
-import type { FileChanges, ImageStore } from './types'
+import type { Exercise, FileChanges, ImageStore } from './types'
+import { machineImageUrl } from './machines'
 
 const IMAGE_REF_PREFIX = 'gist:'
 export const IMAGE_FILE_PREFIX = 'image-'
@@ -55,4 +56,21 @@ export function planImageChange(previousRef: string | null, input: ImageInput, n
 export function releaseImage(imageRef: string | null): FileChanges {
   const storedFile = storedFileOf(imageRef)
   return storedFile ? { [storedFile]: null } : {}
+}
+
+export function exerciseImageSrc(exercise: Exercise, images: ImageStore): string | null {
+  return resolveImageSrc(exercise.image, images) ?? machineImageUrl(exercise.brand, exercise.machine)
+}
+
+export function previewImageSrc(input: ImageInput, ownSrc: string | null, fallbackSrc: string | null): string | null {
+  switch (input.kind) {
+    case 'keep':
+      return ownSrc ?? fallbackSrc
+    case 'upload':
+      return input.dataUrl
+    case 'url':
+      return input.url
+    case 'none':
+      return fallbackSrc
+  }
 }

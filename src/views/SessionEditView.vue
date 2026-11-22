@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Exercise } from '@/domain/types'
 import { exerciseFromEntry } from '@/domain/sessions'
-import { resolveImageSrc } from '@/domain/images'
+import { exerciseImageSrc } from '@/domain/images'
 import { formatLongDate } from '@/domain/dates'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
@@ -34,7 +34,7 @@ const rows = computed(() =>
       entry,
       index,
       exercise,
-      imageSrc: resolveImageSrc(exercise.image, workout.images),
+      imageSrc: exerciseImageSrc(exercise, workout.images),
       previous: editor.previousEntryFor(entry.exerciseId),
     }
   }),

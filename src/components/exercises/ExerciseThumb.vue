@@ -25,7 +25,7 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
 .thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .thumb--sm {

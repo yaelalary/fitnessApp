@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { CategoryId } from '@/domain/types'
 import { describeTargets, filterExercises } from '@/domain/exercises'
-import { resolveImageSrc } from '@/domain/images'
+import { exerciseImageSrc } from '@/domain/images'
 import { useWorkoutStore } from '@/stores/workout'
 import AppButton from '@/components/ui/AppButton.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -17,7 +17,7 @@ const query = ref('')
 const rows = computed(() =>
   filterExercises(workout.exercises, category.value, query.value).map((exercise) => ({
     exercise,
-    imageSrc: resolveImageSrc(exercise.image, workout.images),
+    imageSrc: exerciseImageSrc(exercise, workout.images),
     detail: describeTargets(exercise.defaults, exercise.category),
   })),
 )

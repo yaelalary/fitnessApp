@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { ImageInput } from '@/domain/images'
-import { isValidImageUrl } from '@/domain/images'
+import { isValidImageUrl, previewImageSrc } from '@/domain/images'
 import { compressImage } from '@/services/imageCompression'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -9,7 +9,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
 import ExerciseThumb from './ExerciseThumb.vue'
 
-const props = defineProps<{ modelValue: ImageInput; currentSrc: string | null; alt: string }>()
+const props = defineProps<{ modelValue: ImageInput; currentSrc: string | null; fallbackSrc: string | null; alt: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: ImageInput] }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -17,18 +17,9 @@ const urlDraft = ref('')
 const editingUrl = ref(false)
 const { busy, error, run } = useAsyncAction()
 
-const previewSrc = computed(() => {
-  switch (props.modelValue.kind) {
-    case 'keep':
-      return props.currentSrc
-    case 'upload':
-      return props.modelValue.dataUrl
-    case 'url':
-      return props.modelValue.url
-    case 'none':
-      return null
-  }
-})
+const previewSrc = computed(() => previewImageSrc(props.modelValue, props.currentSrc, props.fallbackSrc))
+const showsOwnImage = computed(() => previewSrc.value !== null && previewSrc.value !== props.fallbackSrc)
+const showsCatalogImage = computed(() => previewSrc.value !== null && !showsOwnImage.value)
 
 const urlError = computed(() =>
   urlDraft.value.trim() !== '' && !isValidImageUrl(urlDraft.value.trim()) ? 'Ce lien ne ressemble pas à une adresse web.' : '',
@@ -54,11 +45,12 @@ function applyUrl() {
 <template>
   <div class="stack">
     <ExerciseThumb :src="previewSrc" :alt="alt" size="lg" />
+    <p v-if="showsCatalogImage" class="muted small">Photo officielle de la machine. Tu peux la remplacer par la tienne.</p>
     <input ref="fileInput" type="file" accept="image/*" capture="environment" @change="onFileSelected" />
     <div class="cluster">
       <AppButton size="sm" icon="camera" :loading="busy" @click="fileInput?.click()">Photo</AppButton>
       <AppButton size="sm" icon="image" @click="editingUrl = !editingUrl">Lien</AppButton>
-      <AppButton v-if="previewSrc" size="sm" variant="ghost" icon="trash" @click="emit('update:modelValue', { kind: 'none' })">
+      <AppButton v-if="showsOwnImage" size="sm" variant="ghost" icon="trash" @click="emit('update:modelValue', { kind: 'none' })">
         Retirer
       </AppButton>
     </div>
