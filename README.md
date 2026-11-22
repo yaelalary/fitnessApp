@@ -1,47 +1,101 @@
 # Carnet muscu
 
-Application Vue 3 pour noter ses séances de musculation, à plusieurs profils.
+Carnet d'entraînement pour la salle : exercices, parcours, séances et progression, sur téléphone, à plusieurs profils.
 
-- **Exercices** : nom, catégorie (échauffement, musculation, cardio, étirement), marque (Technogym, Hammer Strength, poids libres), machine, muscle, séries / répétitions / récupération par défaut, photo de la machine (prise avec le téléphone ou lien vers une image).
-- **Parcours** : enchaînements d'exercices dans l'ordre, avec un objectif par exercice.
-- **Séances** : démarrées depuis un parcours (charges pré-remplies avec celles de la dernière fois) ou en séance libre, minuteur de récupération, séries cochées au fur et à mesure. Une séance en cours est gardée dans le navigateur jusqu'à son enregistrement.
-- **Statistiques** : séances par semaine, et pour chaque exercice charge max, 1RM estimé, volume, répétitions, durée, distance, vitesse.
-- **Profils** : chaque personne a ses propres données.
+**Application en ligne : https://yaelalary.github.io/fitnessApp/**
+
+Sur téléphone, ajoute la page à l'écran d'accueil pour l'ouvrir comme une application.
+
+## Fonctionnalités
+
+- **Exercices** : échauffement, musculation, cardio ou étirement. Pour chacun : marque (Technogym, Hammer Strength, poids libres), machine, groupe musculaire et objectif par défaut (séries, répétitions, charge, récupération, ou durée pour le cardio).
+- **Photos des machines** : quand tu choisis une machine Technogym ou Hammer Strength, sa photo officielle s'affiche. Tu peux la remplacer par ta propre photo ou par un lien.
+- **Parcours** : ta séance type, avec les exercices dans l'ordre et un objectif pour chacun.
+- **Séances** : démarrées depuis un parcours ou en séance libre. Les charges de la dernière fois sont déjà remplies, un minuteur gère la récupération et tu coches chaque série faite. Une séance pas encore enregistrée reste sur le téléphone, même sans réseau.
+- **Statistiques** : séances par semaine, et par exercice : charge max, 1RM estimé, volume et répétitions (durée, distance et vitesse pour le cardio).
+- **Profils** : une personne par profil, avec ses propres données. Le sélecteur en haut de l'écran passe de l'un à l'autre.
+
+## Partager les données entre plusieurs téléphones
+
+Les données sont enregistrées dans un **gist** : un petit dépôt de fichiers privé à ton compte GitHub. Il n'y a ni base de données ni autre service. Sans gist, les données restent dans le navigateur du téléphone.
+
+### 1. Créer un jeton GitHub
+
+Sur https://github.com/settings/tokens/new, crée un jeton **classic** avec **uniquement** le droit `gist`. Copie-le tout de suite : GitHub ne l'affiche qu'une fois.
+
+### 2. Sur le premier téléphone
+
+1. Ouvre l'app et crée ton profil.
+2. Touche l'engrenage en haut à droite, puis va dans **Sauvegarde GitHub Gist**.
+3. Colle le jeton, laisse **Identifiant du gist** vide et touche **Créer un gist**.
+4. L'app affiche le lien du gist : la suite de lettres et de chiffres à la fin est l'**identifiant du gist**.
+5. Crée les profils des autres personnes dans **Réglages → Profils**.
+
+### 3. Sur les autres téléphones
+
+1. Ouvre l'app, touche l'engrenage, puis va dans **Sauvegarde GitHub Gist**.
+2. Colle **le même jeton** et **le même identifiant de gist**, puis touche **Connecter**.
+3. Choisis ton profil en haut de l'écran.
+
+Seul le propriétaire d'un gist peut le modifier : un jeton créé depuis un autre compte GitHub permettrait de lire les données, pas de les enregistrer. Pour pouvoir couper l'accès d'un téléphone sans toucher aux autres, crée depuis ton compte un jeton par téléphone, chacun limité au droit `gist`.
+
+Chaque profil a son propre fichier dans le gist : deux personnes peuvent enregistrer en même temps sans écraser les données de l'autre.
+
+### Sécurité
+
+- **Le jeton** est stocké uniquement dans le navigateur du téléphone, jamais dans le dépôt. Limite-le au droit `gist`.
+- **Le gist « secret »** n'est pas listé publiquement, mais toute personne qui connaît son identifiant peut le lire, sans pouvoir le modifier.
 
 ## Développement
+
+Prérequis : Node.js 22.
 
 ```sh
 npm install
 npm run dev      # serveur local
 npm test         # tests de la logique métier
-npm run build    # build de production dans dist/
+npm run build    # vérification des types et build de production dans dist/
 ```
 
-## Déploiement sur GitHub Pages
+Stack : Vue 3, TypeScript, Vite, Pinia, Vue Router, Chart.js et Vitest.
 
-1. Pousse le projet sur un dépôt GitHub, branche `master`.
-2. Dans **Settings → Pages**, choisis **Source : GitHub Actions**.
-3. Chaque push sur `master` lance `.github/workflows/deploy.yml` (tests, build, déploiement).
+### Organisation du code
 
-L'application utilise un routage par `#` et des chemins relatifs : elle marche quel que soit le nom du dépôt.
+| Dossier | Contenu |
+|---|---|
+| `src/domain/` | Logique métier en fonctions pures, sans Vue, testée : séances, statistiques, validation, catalogue des machines, format des fichiers du gist |
+| `src/services/` | Accès extérieurs : API GitHub Gist, stockage du navigateur, compression des photos |
+| `src/stores/` | État partagé (Pinia), mis à jour seulement après confirmation de l'enregistrement |
+| `src/composables/` | Logique réutilisable des écrans : édition de séance, minuteur, actions asynchrones |
+| `src/components/` | Composants d'interface, rangés par thème (`ui/` pour les éléments génériques) |
+| `src/views/` | Un écran par route |
+| `src/styles/` | Design system : tokens (couleurs, espacements, typographie) en thème clair et sombre, styles globaux |
 
-## Sauvegarde sur un gist
+Les règles propres à chaque type d'exercice (champs, mesures statistiques, valeurs par défaut) sont décrites en données dans `src/domain/categories.ts`. Le catalogue des machines et de leurs photos est dans `src/domain/machineCatalog.ts`.
 
-Sans configuration, les données restent dans le navigateur de l'appareil.
+## Déploiement
 
-1. Crée un jeton GitHub avec le droit `gist` (le lien est dans **Réglages**).
-2. Dans **Réglages → Sauvegarde GitHub Gist**, colle le jeton et clique sur **Créer un gist** : un gist secret est créé avec les données actuelles.
-3. Sur le second téléphone, saisis le même identifiant de gist et un jeton, puis **Connecter**.
+Chaque push sur `master` lance `.github/workflows/deploy.yml` : tests, build puis publication sur GitHub Pages. Dans **Settings → Pages**, la source doit être **GitHub Actions**.
 
-### Gist par défaut
+L'app utilise des adresses avec `#` (`…/fitnessApp/#/exercices`) : GitHub Pages ne sert que des fichiers et renverrait une erreur 404 en rechargeant une adresse sans `#`.
+
+### Gist par défaut (facultatif)
 
 Pour ne saisir que le jeton sur chaque téléphone, l'identifiant du gist peut être fourni au build :
 
-- en local : copie `.env.example` en `.env` et renseigne `VITE_GIST_ID` (`.env` est ignoré par git) ;
-- pour le déploiement : ajoute un secret `GIST_ID` dans **Settings → Secrets and variables → Actions** du dépôt.
+- **en local** : copie `.env.example` en `.env` et renseigne `VITE_GIST_ID`. Le fichier `.env` est ignoré par git ;
+- **en production** : ajoute un secret `GIST_ID` dans **Settings → Secrets and variables → Actions**.
 
-L'identifiant n'apparaît pas dans le dépôt, mais il figure dans le JavaScript publié sur GitHub Pages : toute personne qui ouvre l'app peut le retrouver et lire le gist. Sans jeton, elle ne peut pas le modifier.
+L'identifiant n'apparaît alors pas dans le dépôt, mais il figure dans le JavaScript publié : toute personne qui ouvre l'app peut le retrouver et lire le gist.
 
-Le gist contient un fichier `profile-<id>.json` par profil et un fichier `image-<id>.txt` par photo. Chaque profil n'écrit que son propre fichier : deux personnes peuvent enregistrer en même temps sans écraser les données de l'autre.
+## Format des données
 
-> Le jeton est stocké dans le `localStorage` du navigateur. Sur GitHub Pages, toutes les pages de `<utilisateur>.github.io` partagent ce stockage : utilise un jeton limité au droit `gist`.
+Le gist contient :
+
+- `carnet-muscu.md` : description du gist ;
+- `profile-<id>.json` : un fichier par profil, avec ses exercices, parcours et séances ;
+- `image-<id>.txt` : une photo prise avec le téléphone, compressée en JPEG.
+
+## Crédits
+
+Les photos des machines appartiennent à leurs fabricants : [Technogym](https://www.technogym.com) et [Hammer Strength / Life Fitness](https://www.lifefitness.com). L'app les affiche par lien depuis leurs sites, sans les copier dans le dépôt.
