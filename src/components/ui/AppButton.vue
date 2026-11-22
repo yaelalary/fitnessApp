@@ -91,6 +91,7 @@ const classes = computed(() => [
 }
 
 .button--icon-only {
+  flex: none;
   width: var(--tap-size);
   padding: 0;
 }

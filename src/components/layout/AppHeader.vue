@@ -25,6 +25,7 @@ function onSwitch(event: Event) {
       <select v-if="canSwitch" class="header__profile" :value="activeProfileId" aria-label="Profil actif" @change="onSwitch">
         <option v-for="profile in profiles" :key="profile.id" :value="profile.id">{{ profile.name }}</option>
       </select>
+      <slot />
       <AppButton :to="{ name: 'settings' }" variant="ghost" icon="settings" icon-only label="Réglages" />
     </div>
   </header>
@@ -56,6 +57,7 @@ function onSwitch(event: Event) {
 
 .header__tools {
   flex-wrap: nowrap;
+  gap: var(--space-1);
   min-width: 0;
 }
 

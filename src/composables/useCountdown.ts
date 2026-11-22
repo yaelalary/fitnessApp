@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
+import { vibrateAlert } from '@/services/haptics'
 
 const TICK_MS = 250
-const END_VIBRATION_MS = [200, 100, 200]
 
 export function useCountdown() {
   const endsAt = ref<number | null>(null)
@@ -23,7 +23,7 @@ export function useCountdown() {
 
   function finish() {
     stop()
-    if ('vibrate' in navigator) navigator.vibrate(END_VIBRATION_MS)
+    vibrateAlert()
   }
 
   function start(seconds: number) {

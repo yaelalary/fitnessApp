@@ -58,7 +58,8 @@ export const router = createRouter({
       meta: { tab: 'sessions', requiresProfile: true },
     },
     { path: '/stats', name: 'stats', component: () => import('@/views/StatsView.vue'), meta: { tab: 'stats', requiresProfile: true } },
-    { path: '/reglages', name: 'settings', component: () => import('@/views/SettingsView.vue') },
+    { path: '/outils', name: 'tools', component: () => import('@/views/ToolsView.vue'), meta: { standalone: true } },
+    { path: '/reglages', name: 'settings', component: () => import('@/views/SettingsView.vue'), meta: { standalone: true } },
     { path: '/:pathMatch(.*)*', redirect: { name: 'home' } },
   ],
 })

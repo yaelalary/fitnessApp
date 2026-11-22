@@ -13,6 +13,8 @@ Sur téléphone, ajoute la page à l'écran d'accueil pour l'ouvrir comme une ap
 - **Parcours** : ta séance type, avec les exercices dans l'ordre et un objectif pour chacun.
 - **Séances** : démarrées depuis un parcours ou en séance libre. Les charges de la dernière fois sont déjà remplies, un minuteur gère la récupération et tu coches chaque série faite. Une séance pas encore enregistrée reste sur le téléphone, même sans réseau.
 - **Statistiques** : séances par semaine, et par exercice : charge max, 1RM estimé, volume et répétitions (durée, distance et vitesse pour le cardio).
+- **Outils** (clé à molette en haut de l'écran) : minuteur de **gourde** pour la water station. Touche « Gourde remplie » : l'app décompte le délai choisi (20 minutes par défaut), l'affiche en haut de chaque écran, puis te prévient quand tu peux remplir à nouveau. Le minuteur est propre à chaque téléphone.
+- **Notifications** : à activer dans **Outils**. Elles arrivent tant que l'app reste ouverte en arrière-plan, écran verrouillé compris ; si le téléphone l'a fermée, l'alerte s'affiche à la réouverture. Sur iPhone, il faut d'abord ajouter l'app à l'écran d'accueil.
 - **Profils** : une personne par profil, avec ses propres données. Le sélecteur en haut de l'écran passe de l'un à l'autre.
 
 ## Partager les données entre plusieurs téléphones

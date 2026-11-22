@@ -35,6 +35,11 @@ export function daysBetween(fromIso: string, toIso: string): number {
 
 const longDateFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 const shortDateFormat = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' })
+const timeOfDayFormat = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' })
+
+export function formatTimeOfDay(timestamp: number): string {
+  return timeOfDayFormat.format(new Date(timestamp))
+}
 
 export function formatLongDate(isoDate: string): string {
   return longDateFormat.format(parseIsoDate(isoDate))

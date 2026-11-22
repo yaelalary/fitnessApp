@@ -10,6 +10,9 @@ import AppButton from '@/components/ui/AppButton.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import ProfileChooser from '@/components/profiles/ProfileChooser.vue'
+import ToolsShortcut from '@/components/layout/ToolsShortcut.vue'
+import RefillAlert from '@/components/tools/RefillAlert.vue'
+import { useRefillStore } from '@/stores/refill'
 
 type Gate = 'loading' | 'error' | 'choose-profile' | 'content'
 
@@ -17,9 +20,12 @@ const route = useRoute()
 const settings = useSettingsStore()
 const workout = useWorkoutStore()
 const creation = useAsyncAction()
+const refill = useRefillStore()
+
+const showRefillAlert = computed(() => refill.phase === 'ready' && route.name !== 'tools')
 
 const gate = computed<Gate>(() => {
-  if (route.name === 'settings') return 'content'
+  if (route.meta.standalone) return 'content'
   if (workout.status === 'idle' || workout.status === 'loading') return 'loading'
   if (workout.status === 'error') return 'error'
   if (route.meta.requiresProfile && !workout.activeProfile) return 'choose-profile'
@@ -39,7 +45,10 @@ onMounted(() => workout.load())
     :active-profile-id="workout.activeProfile?.id ?? null"
     :synced="workout.storageKind === 'gist'"
     @switch-profile="settings.setActiveProfile"
-  />
+  >
+    <ToolsShortcut :refill-phase="refill.phase" :refill-remaining-seconds="refill.remainingSeconds" />
+  </AppHeader>
+  <RefillAlert v-if="showRefillAlert" @refill="refill.start" @dismiss="refill.cancel" />
   <main>
     <div v-if="gate === 'loading'" class="page">
       <LoadingState label="Chargement de tes séances…" />

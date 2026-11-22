@@ -21,5 +21,6 @@ declare module 'vue-router' {
   interface RouteMeta {
     tab?: TabId
     requiresProfile?: boolean
+    standalone?: boolean
   }
 }
