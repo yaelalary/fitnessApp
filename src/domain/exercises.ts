@@ -1,6 +1,6 @@
-import type { CategoryId, Exercise, ExerciseTargets } from './types'
+import type { BrandId, CategoryId, Exercise, ExerciseTargets } from './types'
 import { CATEGORIES, categoryOf } from './categories'
-import { BRANDS } from './machines'
+import { BRANDS, findMachine } from './machines'
 import { createId } from './ids'
 import { formatRest } from './dates'
 import { formatNumber } from './numbers'
@@ -25,6 +25,11 @@ export function createExercise(category: CategoryId = 'strength'): Exercise {
 export function changeExerciseCategory(exercise: Exercise, category: CategoryId): Exercise {
   if (exercise.category === category) return exercise
   return { ...exercise, category, defaults: { ...CATEGORIES[category].defaults } }
+}
+
+export function changeExerciseBrand(exercise: Exercise, brand: BrandId | null): Exercise {
+  const belongsToAnotherBrand = findMachine(null, exercise.machine) !== null && findMachine(brand, exercise.machine) === null
+  return { ...exercise, brand, machine: belongsToAnotherBrand ? '' : exercise.machine }
 }
 
 export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseField> {

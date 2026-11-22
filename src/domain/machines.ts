@@ -30,8 +30,21 @@ function normalizeName(name: string): string {
   return name.trim().toLocaleLowerCase('fr')
 }
 
-export function machineSuggestions(brand: BrandId | null): string[] {
-  return machinesOf(brand).map((machine) => machine.name)
+export interface MachineGroup {
+  label: string
+  names: string[]
+}
+
+export function machineGroups(brand: BrandId | null): MachineGroup[] {
+  const brands = brand ? [brand] : BRAND_ORDER
+  return brands.flatMap((brandId) => {
+    const groups = new Map<string, string[]>()
+    for (const machine of BRANDS[brandId].machines) {
+      groups.set(machine.line, [...(groups.get(machine.line) ?? []), machine.name])
+    }
+    const prefix = brand ? '' : `${BRANDS[brandId].label} · `
+    return [...groups].map(([line, names]) => ({ label: `${prefix}${line}`, names }))
+  })
 }
 
 export function findMachine(brand: BrandId | null, name: string): MachineModel | null {
@@ -39,9 +52,17 @@ export function findMachine(brand: BrandId | null, name: string): MachineModel |
   if (!wanted) return null
   return (
     machinesOf(brand).find((machine) =>
-      [machine.name, ...(machine.aliases ?? [])].some((candidate) => normalizeName(candidate) === wanted),
+      [machine.name, ...machine.aliases].some((candidate) => normalizeName(candidate) === wanted),
     ) ?? null
   )
+}
+
+export type MachineSelection = { kind: 'none' } | { kind: 'catalog'; name: string } | { kind: 'custom'; name: string }
+
+export function resolveMachineSelection(brand: BrandId | null, name: string): MachineSelection {
+  if (!name.trim()) return { kind: 'none' }
+  const machine = findMachine(brand, name)
+  return machine ? { kind: 'catalog', name: machine.name } : { kind: 'custom', name }
 }
 
 export function machineImageUrl(brand: BrandId | null, name: string): string | null {

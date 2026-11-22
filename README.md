@@ -55,6 +55,7 @@ npm install
 npm run dev      # serveur local
 npm test         # tests de la logique métier
 npm run build    # vérification des types et build de production dans dist/
+npm run catalog  # régénère le catalogue des machines depuis les sites des fabricants
 ```
 
 Stack : Vue 3, TypeScript, Vite, Pinia, Vue Router, Chart.js et Vitest.
@@ -71,7 +72,18 @@ Stack : Vue 3, TypeScript, Vite, Pinia, Vue Router, Chart.js et Vitest.
 | `src/views/` | Un écran par route |
 | `src/styles/` | Design system : tokens (couleurs, espacements, typographie) en thème clair et sombre, styles globaux |
 
-Les règles propres à chaque type d'exercice (champs, mesures statistiques, valeurs par défaut) sont décrites en données dans `src/domain/categories.ts`. Le catalogue des machines et de leurs photos est dans `src/domain/machineCatalog.ts`.
+Les règles propres à chaque type d'exercice (champs, mesures statistiques, valeurs par défaut) sont décrites en données dans `src/domain/categories.ts`.
+
+### Catalogue des machines
+
+`npm run catalog` lit les catalogues officiels et écrit `src/domain/machineCatalog.generated.ts` :
+
+- **Hammer Strength** : toutes les pages produit « strength training » du sitemap de lifefitness.com dont la marque déclarée est Hammer Strength ;
+- **Technogym** : les machines de musculation et de cardio du sitemap de technogym.com, hors produits réservés à la maison.
+
+Chaque machine garde son nom officiel, sa gamme et sa photo principale ; les photos injoignables sont écartées. Les noms utilisés par d'anciennes versions de l'app sont rattachés aux noms officiels dans `src/domain/machineCatalog.ts`. Un test vérifie qu'ils correspondent toujours à une machine du catalogue.
+
+Pour itérer sans retélécharger les quelque 650 pages, définis `CATALOG_CACHE_DIR` vers un dossier de cache.
 
 ## Déploiement
 

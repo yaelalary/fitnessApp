@@ -3,8 +3,8 @@ import { computed, ref, useId } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
-import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl, machineSuggestions } from '@/domain/machines'
-import { changeExerciseCategory, validateExercise, type ExerciseField } from '@/domain/exercises'
+import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl } from '@/domain/machines'
+import { changeExerciseBrand, changeExerciseCategory, validateExercise, type ExerciseField } from '@/domain/exercises'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { cloneData } from '@/domain/collections'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -12,6 +12,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
 import SegmentedControl, { type SegmentOption } from '@/components/ui/SegmentedControl.vue'
 import ImagePicker from './ImagePicker.vue'
+import MachineSelect from './MachineSelect.vue'
 import TargetsEditor from './TargetsEditor.vue'
 
 const props = withDefaults(
@@ -24,12 +25,10 @@ const emit = defineEmits<{ submit: [exercise: Exercise, image: ImageInput] }>()
 const draft = ref<Exercise>(cloneData(props.exercise))
 const image = ref<ImageInput>({ kind: 'keep' })
 const errors = ref<ValidationErrors<ExerciseField>>({})
-const machineListId = useId()
 const muscleListId = useId()
 
 const categoryOptions: SegmentOption<CategoryId>[] = CATEGORY_ORDER.map((id) => ({ value: id, label: CATEGORIES[id].label }))
 const config = computed(() => categoryOf(draft.value.category))
-const machines = computed(() => machineSuggestions(draft.value.brand))
 const catalogImageSrc = computed(() =>
   config.value.usesMachine ? machineImageUrl(draft.value.brand, draft.value.machine) : null,
 )
@@ -40,7 +39,7 @@ function setCategory(category: CategoryId) {
 
 function setBrand(event: Event) {
   const value = (event.target as HTMLSelectElement).value
-  draft.value.brand = value === '' ? null : (value as BrandId)
+  draft.value = changeExerciseBrand(draft.value, value === '' ? null : (value as BrandId))
 }
 
 function submit() {
@@ -66,7 +65,7 @@ function submit() {
       />
     </FormField>
 
-    <div v-if="config.usesMachine" class="grid-2">
+    <div v-if="config.usesMachine" class="stack">
       <FormField v-slot="field" label="Marque">
         <select :id="field.id" :value="draft.brand ?? ''" @change="setBrand">
           <option value="">Aucune</option>
@@ -74,10 +73,7 @@ function submit() {
         </select>
       </FormField>
       <FormField v-slot="field" label="Machine">
-        <input :id="field.id" v-model="draft.machine" type="text" :list="machineListId" autocomplete="off" />
-        <datalist :id="machineListId">
-          <option v-for="machine in machines" :key="machine" :value="machine" />
-        </datalist>
+        <MachineSelect :id="field.id" v-model="draft.machine" :brand="draft.brand" />
       </FormField>
     </div>
 
