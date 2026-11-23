@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import AppButton from './AppButton.vue'
 
-const props = defineProps<{ open: boolean; title: string }>()
+const props = withDefaults(defineProps<{ open: boolean; title: string; fullscreen?: boolean }>(), { fullscreen: false })
 const emit = defineEmits<{ close: [] }>()
 
 const dialog = ref<HTMLDialogElement | null>(null)
@@ -19,7 +19,7 @@ watch(
 </script>
 
 <template>
-  <dialog ref="dialog" class="dialog" :aria-label="title" @close="emit('close')">
+  <dialog ref="dialog" class="dialog" :class="{ 'dialog--fullscreen': fullscreen }" :aria-label="title" @close="emit('close')">
     <header class="dialog__header">
       <h2 class="section-title">{{ title }}</h2>
       <AppButton variant="ghost" icon="close" icon-only label="Fermer" @click="emit('close')" />
@@ -34,6 +34,19 @@ watch(
 .dialog[open] {
   display: flex;
   flex-direction: column;
+}
+
+.dialog--fullscreen {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border-radius: 0;
+}
+
+.dialog--fullscreen .dialog__body {
+  flex: 1;
+  padding-top: 0;
 }
 
 .dialog__header {

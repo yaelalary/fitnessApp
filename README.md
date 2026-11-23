@@ -9,7 +9,7 @@ Sur téléphone, ajoute la page à l'écran d'accueil pour l'ouvrir comme une ap
 ## Fonctionnalités
 
 - **Exercices** : échauffement, musculation, cardio ou étirement. Pour chacun : marque (Technogym, Hammer Strength, poids libres), machine, groupe musculaire et objectif par défaut (séries, répétitions, charge, récupération, ou durée pour le cardio).
-- **Photos des machines** : quand tu choisis une machine Technogym ou Hammer Strength, sa photo officielle s'affiche. Tu peux la remplacer par ta propre photo ou par un lien.
+- **Photos des machines** : la machine se choisit dans une galerie de photos, avec recherche et filtres par marque et par gamme ; la marque se remplit toute seule. La photo officielle de la machine choisie s'affiche ensuite sur l'exercice. Tu peux la remplacer par ta propre photo ou par un lien.
 - **Parcours** : ta séance type, avec les exercices dans l'ordre et un objectif pour chacun.
 - **Séances** : démarrées depuis un parcours ou en séance libre. Les charges de la dernière fois sont déjà remplies, un minuteur gère la récupération et tu coches chaque série faite. Une séance pas encore enregistrée reste sur le téléphone, même sans réseau.
 - **Statistiques** : séances par semaine, et par exercice : charge max, 1RM estimé, volume et répétitions (durée, distance et vitesse pour le cardio).

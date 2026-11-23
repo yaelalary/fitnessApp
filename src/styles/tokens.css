@@ -55,6 +55,7 @@
   --z-nav: 20;
   --z-dialog: 30;
 
+  --image-blend: multiply;
   --color-bg: #f3f2ee;
   --color-surface: #ffffff;
   --color-surface-sunken: #e9e8e3;
@@ -92,6 +93,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --image-blend: normal;
     --color-bg: #111317;
     --color-surface: #1a1d22;
     --color-surface-sunken: #0c0e11;

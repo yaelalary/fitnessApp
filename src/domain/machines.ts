@@ -19,7 +19,7 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
 export const BRAND_ORDER: BrandId[] = ['technogym', 'hammer-strength', 'free-weights', 'other']
 
 export function isBrandId(value: unknown): value is BrandId {
-  return typeof value === 'string' && value in BRANDS
+  return typeof value === 'string' && Object.hasOwn(BRANDS, value)
 }
 
 function machinesOf(brand: BrandId | null): MachineModel[] {
@@ -28,23 +28,6 @@ function machinesOf(brand: BrandId | null): MachineModel[] {
 
 function normalizeName(name: string): string {
   return name.trim().toLocaleLowerCase('fr')
-}
-
-export interface MachineGroup {
-  label: string
-  names: string[]
-}
-
-export function machineGroups(brand: BrandId | null): MachineGroup[] {
-  const brands = brand ? [brand] : BRAND_ORDER
-  return brands.flatMap((brandId) => {
-    const groups = new Map<string, string[]>()
-    for (const machine of BRANDS[brandId].machines) {
-      groups.set(machine.line, [...(groups.get(machine.line) ?? []), machine.name])
-    }
-    const prefix = brand ? '' : `${BRANDS[brandId].label} · `
-    return [...groups].map(([line, names]) => ({ label: `${prefix}${line}`, names }))
-  })
 }
 
 export function findMachine(brand: BrandId | null, name: string): MachineModel | null {
@@ -57,16 +40,70 @@ export function findMachine(brand: BrandId | null, name: string): MachineModel |
   )
 }
 
-export type MachineSelection = { kind: 'none' } | { kind: 'catalog'; name: string } | { kind: 'custom'; name: string }
-
-export function resolveMachineSelection(brand: BrandId | null, name: string): MachineSelection {
-  if (!name.trim()) return { kind: 'none' }
-  const machine = findMachine(brand, name)
-  return machine ? { kind: 'catalog', name: machine.name } : { kind: 'custom', name }
-}
-
 export function machineImageUrl(brand: BrandId | null, name: string): string | null {
   return findMachine(brand, name)?.imageUrl ?? null
+}
+
+export interface CatalogEntry {
+  brand: BrandId
+  name: string
+  line: string
+  imageUrl: string | null
+}
+
+export interface CatalogFilter {
+  brand: BrandId | null
+  line: string | null
+  query: string
+}
+
+export const CATALOG_ENTRIES: CatalogEntry[] = BRAND_ORDER.flatMap((brand) =>
+  BRANDS[brand].machines.map(({ name, line, imageUrl }) => ({ brand, name, line, imageUrl })),
+)
+
+export const CATALOG_BRANDS: BrandId[] = BRAND_ORDER.filter((brand) => BRANDS[brand].machines.length > 0)
+
+export function catalogLines(brand: BrandId | null): string[] {
+  if (!brand) return []
+  return [...new Set(BRANDS[brand].machines.map((machine) => machine.line))]
+}
+
+function searchable(text: string): string {
+  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr')
+}
+
+export function filterCatalog(entries: readonly CatalogEntry[], filter: CatalogFilter): CatalogEntry[] {
+  const words = searchable(filter.query).split(/\s+/).filter(Boolean)
+  return entries.filter((entry) => {
+    if (filter.brand && entry.brand !== filter.brand) return false
+    if (filter.line && entry.line !== filter.line) return false
+    const haystack = searchable(`${entry.name} ${entry.line} ${BRANDS[entry.brand].label}`)
+    return words.every((word) => haystack.includes(word))
+  })
+}
+
+export function findCatalogEntry(brand: BrandId | null, name: string): CatalogEntry | null {
+  const brands = brand ? [brand] : BRAND_ORDER
+  for (const brandId of brands) {
+    const machine = findMachine(brandId, name)
+    if (machine) return { brand: brandId, name: machine.name, line: machine.line, imageUrl: machine.imageUrl }
+  }
+  return null
+}
+
+const RESIZE_PARAMS = ['sw', 'width']
+
+export function machineThumbnailUrl(imageUrl: string | null, width: number): string | null {
+  if (!imageUrl) return null
+  try {
+    const url = new URL(imageUrl)
+    const param = RESIZE_PARAMS.find((name) => url.searchParams.has(name))
+    if (!param) return imageUrl
+    url.searchParams.set(param, String(width))
+    return url.toString()
+  } catch {
+    return imageUrl
+  }
 }
 
 export const MUSCLE_GROUPS = [

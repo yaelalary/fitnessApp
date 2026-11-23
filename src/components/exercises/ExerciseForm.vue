@@ -3,8 +3,14 @@ import { computed, ref, useId } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
-import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl } from '@/domain/machines'
-import { changeExerciseBrand, changeExerciseCategory, validateExercise, type ExerciseField } from '@/domain/exercises'
+import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl, type CatalogEntry } from '@/domain/machines'
+import {
+  changeExerciseBrand,
+  changeExerciseCategory,
+  selectCatalogMachine,
+  validateExercise,
+  type ExerciseField,
+} from '@/domain/exercises'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { cloneData } from '@/domain/collections'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -12,7 +18,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
 import SegmentedControl, { type SegmentOption } from '@/components/ui/SegmentedControl.vue'
 import ImagePicker from './ImagePicker.vue'
-import MachineSelect from './MachineSelect.vue'
+import MachineField from './MachineField.vue'
 import TargetsEditor from './TargetsEditor.vue'
 
 const props = withDefaults(
@@ -42,6 +48,10 @@ function setBrand(event: Event) {
   draft.value = changeExerciseBrand(draft.value, value === '' ? null : (value as BrandId))
 }
 
+function pickMachine(entry: CatalogEntry) {
+  draft.value = selectCatalogMachine(draft.value, entry)
+}
+
 function submit() {
   errors.value = validateExercise(draft.value)
   if (hasErrors(errors.value)) return
@@ -66,14 +76,14 @@ function submit() {
     </FormField>
 
     <div v-if="config.usesMachine" class="stack">
-      <FormField v-slot="field" label="Marque">
-        <select :id="field.id" :value="draft.brand ?? ''" @change="setBrand">
+      <FormField v-slot="field" label="Machine">
+        <MachineField :id="field.id" v-model="draft.machine" :brand="draft.brand" @pick="pickMachine" />
+      </FormField>
+      <FormField v-slot="field" label="Marque" hint="Remplie toute seule quand tu choisis une machine du catalogue.">
+        <select :id="field.id" :value="draft.brand ?? ''" :aria-describedby="field.describedBy" @change="setBrand">
           <option value="">Aucune</option>
           <option v-for="brandId in BRAND_ORDER" :key="brandId" :value="brandId">{{ BRANDS[brandId].label }}</option>
         </select>
-      </FormField>
-      <FormField v-slot="field" label="Machine">
-        <MachineSelect :id="field.id" v-model="draft.machine" :brand="draft.brand" />
       </FormField>
     </div>
 

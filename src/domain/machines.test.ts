@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { BRAND_ORDER, findMachine, machineGroups, machineImageUrl, resolveMachineSelection } from './machines'
+import {
+  BRAND_ORDER,
+  CATALOG_BRANDS,
+  CATALOG_ENTRIES,
+  catalogLines,
+  filterCatalog,
+  findCatalogEntry,
+  findMachine,
+  isBrandId,
+  machineImageUrl,
+  machineThumbnailUrl,
+} from './machines'
 import { MACHINE_CATALOG, PREVIOUS_MACHINE_NAMES } from './machineCatalog'
 import { exerciseImageSrc, previewImageSrc } from './images'
-import { changeExerciseBrand, createExercise } from './exercises'
+import { changeExerciseBrand, createExercise, selectCatalogMachine } from './exercises'
 
 describe('catalogue des machines', () => {
   it('trouve une machine sans tenir compte de la casse ni des espaces', () => {
@@ -35,18 +46,6 @@ describe('catalogue des machines', () => {
     expect(findMachine('technogym', 'V-Squat')).toBeNull()
   })
 
-  it('regroupe les machines par gamme, avec les noms officiels', () => {
-    const groups = machineGroups('hammer-strength')
-    const names = groups.flatMap((group) => group.names)
-    expect(groups.map((group) => group.label)).toContain('Plate-Loaded')
-    expect(names).toContain('Glute Drive')
-    expect(names).not.toContain('Hip Thrust')
-  })
-
-  it('préfixe les gammes par la marque quand aucune marque n’est choisie', () => {
-    expect(machineGroups(null).map((group) => group.label)).toContain('Technogym · Selection')
-  })
-
   it('n’a que des images en https', () => {
     const urls = Object.values(MACHINE_CATALOG).flatMap((machines) => machines.map((machine) => machine.imageUrl))
     expect(urls.filter((url) => url !== null).every((url) => url!.startsWith('https://'))).toBe(true)
@@ -75,16 +74,6 @@ describe('image d’un exercice', () => {
 })
 
 describe('choix de la machine', () => {
-  it('reconnaît une machine du catalogue, y compris par son ancien nom', () => {
-    expect(resolveMachineSelection('hammer-strength', 'hip thrust')).toEqual({ kind: 'catalog', name: 'Glute Drive' })
-    expect(resolveMachineSelection('technogym', 'Leg Press')).toEqual({ kind: 'catalog', name: 'Selection 900 Leg Press' })
-  })
-
-  it('garde une machine hors catalogue comme saisie libre', () => {
-    expect(resolveMachineSelection('technogym', 'Presse maison')).toEqual({ kind: 'custom', name: 'Presse maison' })
-    expect(resolveMachineSelection('technogym', '  ')).toEqual({ kind: 'none' })
-  })
-
   it('vide la machine quand elle appartient à une autre marque', () => {
     const exercise = { ...createExercise('strength'), brand: 'technogym' as const, machine: 'Selection 900 Pulldown' }
     expect(changeExerciseBrand(exercise, 'hammer-strength').machine).toBe('')
@@ -99,5 +88,63 @@ describe('choix de la machine', () => {
   it('garde une machine saisie librement en changeant de marque', () => {
     const exercise = { ...createExercise('strength'), brand: 'technogym' as const, machine: 'Presse maison' }
     expect(changeExerciseBrand(exercise, 'other')).toMatchObject({ brand: 'other', machine: 'Presse maison' })
+  })
+})
+
+describe('galerie des machines', () => {
+  const all = { brand: null, line: null, query: '' }
+
+  it('liste toutes les machines du catalogue avec leur marque', () => {
+    expect(CATALOG_ENTRIES.length).toBe(BRAND_ORDER.reduce((sum, brand) => sum + MACHINE_CATALOG[brand].length, 0))
+    expect(CATALOG_BRANDS).toEqual(['technogym', 'hammer-strength', 'free-weights'])
+  })
+
+  it('filtre par marque puis par gamme', () => {
+    const hammer = filterCatalog(CATALOG_ENTRIES, { ...all, brand: 'hammer-strength' })
+    expect(hammer.every((entry) => entry.brand === 'hammer-strength')).toBe(true)
+    const benches = filterCatalog(CATALOG_ENTRIES, { ...all, brand: 'hammer-strength', line: 'Bancs' })
+    expect(benches.length).toBeGreaterThan(0)
+    expect(benches.every((entry) => entry.line === 'Bancs')).toBe(true)
+  })
+
+  it('cherche chaque mot dans le nom, la gamme et la marque, sans tenir compte des accents', () => {
+    const names = filterCatalog(CATALOG_ENTRIES, { ...all, query: 'hammer  horizontal BENCH' }).map((entry) => entry.name)
+    expect(names).toContain('Iso-Lateral Horizontal Bench Press')
+    expect(names.every((name) => /horizontal/i.test(name))).toBe(true)
+    expect(filterCatalog(CATALOG_ENTRIES, { ...all, query: 'halteres' }).map((entry) => entry.name)).toEqual(['Haltères'])
+    expect(filterCatalog(CATALOG_ENTRIES, { ...all, query: 'zzz' })).toEqual([])
+  })
+
+  it('donne les gammes d’une marque, sans doublon', () => {
+    const lines = catalogLines('hammer-strength')
+    expect(lines).toContain('Plate-Loaded')
+    expect(new Set(lines).size).toBe(lines.length)
+    expect(catalogLines(null)).toEqual([])
+  })
+
+  it('retrouve l’entrée d’une machine enregistrée, y compris par son ancien nom et sans marque', () => {
+    expect(findCatalogEntry('technogym', 'Leg Press')).toMatchObject({ brand: 'technogym', name: 'Selection 900 Leg Press' })
+    expect(findCatalogEntry(null, 'Glute Drive')).toMatchObject({ brand: 'hammer-strength', line: 'Plate-Loaded' })
+    expect(findCatalogEntry('technogym', 'Presse maison')).toBeNull()
+  })
+
+  it('demande une vignette plus petite aux deux fabricants', () => {
+    expect(machineThumbnailUrl('https://webapi-prod.technogym.com/a.jpg?sw=800', 320)).toBe('https://webapi-prod.technogym.com/a.jpg?sw=320')
+    expect(machineThumbnailUrl('https://www.lifefitness.com/a.png?width=800', 320)).toBe('https://www.lifefitness.com/a.png?width=320')
+    expect(machineThumbnailUrl('https://ailleurs.example/a.png', 320)).toBe('https://ailleurs.example/a.png')
+    expect(machineThumbnailUrl(null, 320)).toBeNull()
+  })
+
+  it('remplit la marque et la machine en choisissant dans la galerie', () => {
+    const entry = findCatalogEntry(null, 'Glute Drive')!
+    expect(selectCatalogMachine(createExercise('strength'), entry)).toMatchObject({ brand: 'hammer-strength', machine: 'Glute Drive' })
+  })
+})
+
+describe('isBrandId', () => {
+  it('refuse les propriétés héritées', () => {
+    expect(isBrandId('technogym')).toBe(true)
+    expect(isBrandId('toString')).toBe(false)
+    expect(isBrandId('constructor')).toBe(false)
   })
 })

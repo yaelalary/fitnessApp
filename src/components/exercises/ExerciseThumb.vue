@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppIcon from '@/components/ui/AppIcon.vue'
 
-withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' }>(), { size: 'md' })
+withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' | 'square' }>(), { size: 'md' })
 </script>
 
 <template>
@@ -30,6 +30,7 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
   height: 100%;
   padding: var(--space-1);
   object-fit: contain;
+  mix-blend-mode: var(--image-blend);
 }
 
 .thumb--sm {
@@ -45,5 +46,10 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
 .thumb--lg {
   width: 100%;
   height: var(--thumb-size-lg);
+}
+
+.thumb--square {
+  width: 100%;
+  aspect-ratio: 1;
 }
 </style>
