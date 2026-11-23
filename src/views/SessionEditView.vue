@@ -16,6 +16,7 @@ import FormField from '@/components/ui/FormField.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import ExercisePicker from '@/components/exercises/ExercisePicker.vue'
 import SessionEntryCard from '@/components/sessions/SessionEntryCard.vue'
+import SortableList from '@/components/ui/SortableList.vue'
 
 const props = defineProps<{ id: string }>()
 
@@ -39,7 +40,12 @@ const rows = computed(() =>
     }
   }),
 )
-const entryCount = computed(() => rows.value.length)
+type Row = (typeof rows.value)[number]
+const rowKey = (row: Row) => row.entry.id
+
+function moveBy(row: Row, offset: -1 | 1) {
+  editor.moveEntry(row.index, row.index + offset)
+}
 const discardLabel = computed(() => (saved.value ? 'Annuler les modifications' : 'Abandonner'))
 const canDiscard = computed(() => hasUnsavedChanges.value)
 
@@ -111,19 +117,19 @@ async function remove() {
 
       <EmptyState v-if="rows.length === 0" title="Séance vide" message="Ajoute les exercices au fur et à mesure." />
 
-      <SessionEntryCard
-        v-for="row in rows"
-        :key="row.entry.id"
-        :entry="row.entry"
-        :exercise="row.exercise"
-        :image-src="row.imageSrc"
-        :previous="row.previous"
-        :index="row.index"
-        :count="entryCount"
-        @update="editor.updateEntry"
-        @move="editor.moveEntry(row.index, $event)"
-        @remove="editor.removeEntry(row.entry.id)"
-      />
+      <SortableList :items="rows" :item-key="rowKey" @move="editor.moveEntry">
+        <template #default="{ item: row }">
+          <SessionEntryCard
+            :entry="row.entry"
+            :exercise="row.exercise"
+            :image-src="row.imageSrc"
+            :previous="row.previous"
+            @update="editor.updateEntry"
+            @move="moveBy(row, $event)"
+            @remove="editor.removeEntry(row.entry.id)"
+          />
+        </template>
+      </SortableList>
 
       <AppButton icon="plus" block @click="pickerOpen = true">Ajouter un exercice</AppButton>
 

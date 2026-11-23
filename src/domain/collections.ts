@@ -16,7 +16,8 @@ export function findById<T extends Identified>(list: readonly T[], id: string): 
 }
 
 export function moveItem<T>(list: readonly T[], fromIndex: number, toIndex: number): T[] {
-  if (toIndex < 0 || toIndex >= list.length || fromIndex === toIndex) return [...list]
+  const isValidIndex = (index: number) => Number.isInteger(index) && index >= 0 && index < list.length
+  if (!isValidIndex(fromIndex) || !isValidIndex(toIndex) || fromIndex === toIndex) return [...list]
   const next = [...list]
   const [moved] = next.splice(fromIndex, 1)
   next.splice(toIndex, 0, moved)

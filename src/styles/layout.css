@@ -130,6 +130,15 @@
   white-space: nowrap;
 }
 
+.is-sorting-ghost {
+  opacity: 0.35;
+}
+
+.is-sorting-drag {
+  box-shadow: var(--shadow-dialog);
+  opacity: 1 !important;
+}
+
 .is-spinning {
   animation: spin var(--duration-spin) linear infinite;
 }

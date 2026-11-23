@@ -36,8 +36,8 @@ export function useSessionEditor(sessionId: string) {
     if (session.value) update({ entries: removeById(session.value.entries, entryId) })
   }
 
-  function moveEntry(index: number, offset: -1 | 1) {
-    if (session.value) update({ entries: moveItem(session.value.entries, index, index + offset) })
+  function moveEntry(fromIndex: number, toIndex: number) {
+    if (session.value) update({ entries: moveItem(session.value.entries, fromIndex, toIndex) })
   }
 
   function addExercise(exercise: Exercise) {

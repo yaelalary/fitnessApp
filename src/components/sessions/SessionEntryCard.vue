@@ -6,7 +6,8 @@ import { addSet, describePerformance, isEntryComplete, removeSet, updateSet } fr
 import AppButton from '@/components/ui/AppButton.vue'
 import FormField from '@/components/ui/FormField.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
-import ReorderControls from '@/components/ui/ReorderControls.vue'
+import DragHandle from '@/components/ui/DragHandle.vue'
+import RemoveItemButton from '@/components/ui/RemoveItemButton.vue'
 import ExerciseSummary from '@/components/exercises/ExerciseSummary.vue'
 import RestTimer from './RestTimer.vue'
 import SetRow from './SetRow.vue'
@@ -18,8 +19,6 @@ const props = defineProps<{
   exercise: Exercise
   imageSrc: string | null
   previous: SessionEntry | null
-  index: number
-  count: number
 }>()
 
 const emit = defineEmits<{ update: [entry: SessionEntry]; move: [offset: -1 | 1]; remove: [] }>()
@@ -39,7 +38,9 @@ function patchSet(index: number, changes: Partial<SetLog>) {
 
 <template>
   <article class="card stack entry" :class="{ 'entry--complete': complete }">
-    <ExerciseSummary :exercise="exercise" :image-src="imageSrc" />
+    <ExerciseSummary :exercise="exercise" :image-src="imageSrc">
+      <DragHandle :item-label="exercise.name" @move="emit('move', $event)" />
+    </ExerciseSummary>
     <p v-if="previousSummary" class="small muted">Dernière fois : {{ previousSummary }}</p>
     <p v-if="exercise.notes" class="small notes">{{ exercise.notes }}</p>
 
@@ -95,14 +96,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
       />
     </FormField>
 
-    <ReorderControls
-      class="entry__controls"
-      :index="index"
-      :count="count"
-      :item-label="exercise.name"
-      @move="emit('move', $event)"
-      @remove="emit('remove')"
-    />
+    <RemoveItemButton @remove="emit('remove')" />
   </article>
 </template>
 
@@ -120,9 +114,5 @@ function patchSet(index: number, changes: Partial<SetLog>) {
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
   white-space: pre-line;
-}
-
-.entry__controls {
-  justify-content: flex-end;
 }
 </style>

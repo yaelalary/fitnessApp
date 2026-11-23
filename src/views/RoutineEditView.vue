@@ -16,6 +16,7 @@ import FormField from '@/components/ui/FormField.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import ExercisePicker from '@/components/exercises/ExercisePicker.vue'
 import RoutineItemRow from '@/components/routines/RoutineItemRow.vue'
+import SortableList from '@/components/ui/SortableList.vue'
 
 const props = defineProps<{ id?: string }>()
 
@@ -48,8 +49,18 @@ function updateTargets(itemId: string, targets: ExerciseTargets) {
   draft.value.items = draft.value.items.map((item) => (item.id === itemId ? { ...item, targets } : item))
 }
 
-function move(index: number, offset: -1 | 1) {
-  draft.value.items = moveItem(draft.value.items, index, index + offset)
+type Row = (typeof rows.value)[number]
+const rowKey = (row: Row) => row.item.id
+
+function moveRow(fromRow: number, toRow: number) {
+  const from = rows.value[fromRow]
+  const to = rows.value[toRow]
+  if (from && to) draft.value.items = moveItem(draft.value.items, from.index, to.index)
+}
+
+function moveBy(row: Row, offset: -1 | 1) {
+  const position = rows.value.indexOf(row)
+  moveRow(position, position + offset)
 }
 
 function removeItem(itemId: string) {
@@ -97,18 +108,19 @@ async function remove() {
       <section class="stack">
         <h2 class="section-title">Exercices</h2>
         <EmptyState v-if="rows.length === 0" title="Parcours vide" message="Ajoute les exercices dans l’ordre où tu les fais." />
-        <RoutineItemRow
-          v-for="row in rows"
-          :key="row.item.id"
-          :item="row.item"
-          :exercise="row.exercise"
-          :image-src="row.imageSrc"
-          :index="row.index"
-          :count="draft.items.length"
-          @update:targets="updateTargets(row.item.id, $event)"
-          @move="move(row.index, $event)"
-          @remove="removeItem(row.item.id)"
-        />
+        <SortableList :items="rows" :item-key="rowKey" @move="moveRow">
+          <template #default="{ item: row, index }">
+            <RoutineItemRow
+              :item="row.item"
+              :exercise="row.exercise"
+              :image-src="row.imageSrc"
+              :index="index"
+              @update:targets="updateTargets(row.item.id, $event)"
+              @move="moveBy(row, $event)"
+              @remove="removeItem(row.item.id)"
+            />
+          </template>
+        </SortableList>
         <ErrorMessage v-if="errors.items" :message="errors.items" />
         <AppButton icon="plus" block @click="pickerOpen = true">Ajouter un exercice</AppButton>
       </section>
