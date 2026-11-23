@@ -11,8 +11,8 @@ export interface NavTab {
 
 export const NAV_TABS: NavTab[] = [
   { id: 'home', routeName: 'home', label: 'Accueil', icon: 'home' },
-  { id: 'routines', routeName: 'routines', label: 'Parcours', icon: 'route' },
   { id: 'exercises', routeName: 'exercises', label: 'Exercices', icon: 'dumbbell' },
+  { id: 'routines', routeName: 'routines', label: 'Parcours', icon: 'route' },
   { id: 'sessions', routeName: 'sessions', label: 'Historique', icon: 'history' },
   { id: 'stats', routeName: 'stats', label: 'Stats', icon: 'chart' },
 ]
