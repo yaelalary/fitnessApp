@@ -87,5 +87,5 @@ export function categoryOf(id: CategoryId): CategoryConfig {
 }
 
 export function isCategoryId(value: unknown): value is CategoryId {
-  return typeof value === 'string' && value in CATEGORIES
+  return typeof value === 'string' && Object.hasOwn(CATEGORIES, value)
 }

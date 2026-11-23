@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { categoryFromRoute, exerciseListRoute } from '@/router/exerciseRoutes'
 import type { Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { resolveImageSrc } from '@/domain/images'
@@ -14,20 +15,23 @@ import ExerciseForm from '@/components/exercises/ExerciseForm.vue'
 
 const props = defineProps<{ id?: string }>()
 
+const route = useRoute()
 const router = useRouter()
 const workout = useWorkoutStore()
 const { busy, error, run } = useAsyncAction()
 
+const listCategory = categoryFromRoute(route)
+const listRoute = exerciseListRoute(listCategory)
 const isNew = computed(() => props.id === undefined)
 const exercise = computed<Exercise | null>(() =>
-  props.id === undefined ? createExercise() : (workout.exercisesById.get(props.id) ?? null),
+  props.id === undefined ? createExercise(listCategory ?? undefined) : (workout.exercisesById.get(props.id) ?? null),
 )
 const imageSrc = computed(() => resolveImageSrc(exercise.value?.image ?? null, workout.images))
 const title = computed(() => (isNew.value ? 'Nouvel exercice' : (exercise.value?.name ?? 'Exercice')))
 
 async function save(draft: Exercise, image: ImageInput) {
   const saved = await run(() => workout.saveExercise(draft, image))
-  if (saved) router.push({ name: 'exercises' })
+  if (saved) router.push(listRoute)
 }
 
 async function remove() {
@@ -35,16 +39,16 @@ async function remove() {
   const exerciseId = exercise.value.id
   await run(async () => {
     await workout.deleteExercise(exerciseId)
-    await router.push({ name: 'exercises' })
+    await router.push(listRoute)
   })
 }
 </script>
 
 <template>
   <div class="page">
-    <PageHeader :title="title" :back-to="{ name: 'exercises' }" />
+    <PageHeader :title="title" :back-to="listRoute" />
     <EmptyState v-if="!exercise" title="Exercice introuvable" message="Il a peut-être été supprimé.">
-      <AppButton :to="{ name: 'exercises' }">Retour aux exercices</AppButton>
+      <AppButton :to="listRoute">Retour aux exercices</AppButton>
     </EmptyState>
     <ExerciseForm v-else :exercise="exercise" :image-src="imageSrc" :submitting="busy" :error="error" @submit="save">
       <template v-if="!isNew" #secondary-action>
