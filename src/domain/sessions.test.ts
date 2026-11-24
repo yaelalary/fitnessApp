@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, Routine, Session } from './types'
-import { addSet, completeAllSets, createSessionFromRoutine, describePerformance, describeSessionSummary, findLastEntry, hasPendingSets, removeSet, summarizeSession, updateSet } from './sessions'
+import { addSet, completeAllEntries, createSessionFromRoutine, describePerformance, describeSessionSummary, findLastEntry, hasPendingEntries, isEntryComplete, removeSet, summarizeSession, updateSet } from './sessions'
 import { createExercise } from './exercises'
 
 function exercise(id: string, overrides: Partial<Exercise> = {}): Exercise {
@@ -43,6 +43,7 @@ const history: Session[] = [
         durationMinutes: 0,
         distanceKm: 0,
         notes: '',
+        done: false,
       },
     ],
   },
@@ -108,23 +109,38 @@ describe('tout cocher', () => {
   const session = createSessionFromRoutine(routine, exercisesById, history, '2026-11-22')
 
   it('signale les séries restant à cocher', () => {
-    expect(hasPendingSets(session)).toBe(true)
+    expect(hasPendingEntries(session)).toBe(true)
   })
 
   it('coche toutes les séries sans modifier charges ni répétitions', () => {
-    const completed = completeAllSets(session)
-    expect(hasPendingSets(completed)).toBe(false)
+    const completed = completeAllEntries(session)
+    expect(hasPendingEntries(completed)).toBe(false)
     expect(completed.entries[1].sets).toEqual(session.entries[1].sets.map((set) => ({ ...set, done: true })))
     expect(completed.entries[0].durationMinutes).toBe(15)
   })
 
   it('ne mute pas la séance d’origine', () => {
-    completeAllSets(session)
+    completeAllEntries(session)
     expect(session.entries[1].sets.every((set) => !set.done)).toBe(true)
   })
 
-  it('ne signale rien pour une séance sans séries', () => {
-    expect(hasPendingSets({ ...session, entries: [session.entries[0]] })).toBe(false)
+  it('compte le cardio comme à cocher tant qu’il n’est pas fait', () => {
+    const cardio = session.entries[0]
+    expect(isEntryComplete(cardio)).toBe(false)
+    expect(hasPendingEntries({ ...session, entries: [cardio] })).toBe(true)
+    expect(isEntryComplete({ ...cardio, done: true })).toBe(true)
+  })
+
+  it('coche aussi le cardio', () => {
+    const completed = completeAllEntries(session)
+    expect(completed.entries[0].done).toBe(true)
+    expect(isEntryComplete(completed.entries[0])).toBe(true)
+  })
+
+  it('ne signale rien pour un exercice de musculation sans séries', () => {
+    const empty = { ...session.entries[1], sets: [] }
+    expect(hasPendingEntries({ ...session, entries: [empty] })).toBe(false)
+    expect(isEntryComplete(empty)).toBe(false)
   })
 })
 

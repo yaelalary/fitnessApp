@@ -86,6 +86,7 @@ function normalizeEntry(value: unknown): SessionEntry {
     durationMinutes: toSafeNumber(raw.durationMinutes),
     distanceKm: toSafeNumber(raw.distanceKm),
     notes: asString(raw.notes),
+    done: raw.done === true,
   }
 }
 

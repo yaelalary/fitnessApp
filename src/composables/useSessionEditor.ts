@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import type { Exercise, Session, SessionEntry } from '@/domain/types'
 import { cloneData, findById, moveItem, removeById, upsertById } from '@/domain/collections'
-import { completeAllSets, createEntry, findLastEntry } from '@/domain/sessions'
+import { completeAllEntries, createEntry, findLastEntry } from '@/domain/sessions'
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '@/services/sessionDrafts'
 import { useWorkoutStore } from '@/stores/workout'
 
@@ -41,7 +41,7 @@ export function useSessionEditor(sessionId: string) {
   }
 
   function completeAll() {
-    if (session.value) session.value = completeAllSets(session.value)
+    if (session.value) session.value = completeAllEntries(session.value)
   }
 
   function addExercise(exercise: Exercise) {

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Exercise } from '@/domain/types'
-import { exerciseFromEntry, hasPendingSets } from '@/domain/sessions'
+import { exerciseFromEntry, hasPendingEntries } from '@/domain/sessions'
 import { exerciseImageSrc } from '@/domain/images'
 import { formatLongDate } from '@/domain/dates'
 import { useWorkoutStore } from '@/stores/workout'
@@ -46,7 +46,7 @@ const rowKey = (row: Row) => row.entry.id
 function moveBy(row: Row, offset: -1 | 1) {
   editor.moveEntry(row.index, row.index + offset)
 }
-const canCompleteAll = computed(() => (session.value ? hasPendingSets(session.value) : false))
+const canCompleteAll = computed(() => (session.value ? hasPendingEntries(session.value) : false))
 const discardLabel = computed(() => (saved.value ? 'Annuler les modifications' : 'Abandonner'))
 const canDiscard = computed(() => hasUnsavedChanges.value)
 

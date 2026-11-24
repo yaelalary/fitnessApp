@@ -14,6 +14,7 @@ function entry(overrides: Partial<SessionEntry>): SessionEntry {
     durationMinutes: 0,
     distanceKm: 0,
     notes: '',
+    done: false,
     ...overrides,
   }
 }

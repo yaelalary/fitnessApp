@@ -95,6 +95,15 @@ describe('normalizeProfile', () => {
     expect(profile?.sessions).toEqual([])
   })
 
+  it('garde l’état coché des exercices et le met à faux sur les anciennes séances', () => {
+    const profile = normalizeProfile({
+      id: 'p',
+      name: 'Alex',
+      sessions: [{ id: 's', date: '2026-11-20', entries: [{ id: 'a', category: 'cardio', done: true }, { id: 'b', category: 'cardio' }] }],
+    })
+    expect(profile?.sessions[0].entries.map((entry) => entry.done)).toEqual([true, false])
+  })
+
   it('rejette un profil sans identifiant', () => {
     expect(normalizeProfile({ name: 'x' })).toBeNull()
   })

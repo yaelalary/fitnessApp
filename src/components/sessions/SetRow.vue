@@ -1,26 +1,28 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { SetLog } from '@/domain/types'
 import { WEIGHT_STEP_KG, type CategoryConfig } from '@/domain/categories'
 import AppButton from '@/components/ui/AppButton.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
+import CheckableRow from './CheckableRow.vue'
 
-defineProps<{ set: SetLog; index: number; config: CategoryConfig }>()
+const props = defineProps<{ set: SetLog; index: number; config: CategoryConfig }>()
 defineEmits<{ update: [patch: Partial<SetLog>]; remove: [] }>()
+
+const number = computed(() => props.index + 1)
 </script>
 
 <template>
-  <li class="set" :class="{ 'set--done': set.done }">
-    <input
-      type="checkbox"
-      :checked="set.done"
-      :aria-label="`Série ${index + 1} faite`"
-      @change="$emit('update', { done: ($event.target as HTMLInputElement).checked })"
-    />
-    <span class="numeric set__index" aria-hidden="true">{{ index + 1 }}</span>
+  <CheckableRow
+    tag="li"
+    :done="set.done"
+    :marker="String(number)"
+    :label="`Série ${number} faite`"
+    @update:done="$emit('update', { done: $event })"
+  >
     <NumberStepper
-      class="set__field"
       compact
-      :label="`${config.repsLabel} série ${index + 1}`"
+      :label="`${config.repsLabel} série ${number}`"
       :unit="config.repsUnit"
       :max="600"
       :model-value="set.reps"
@@ -28,38 +30,16 @@ defineEmits<{ update: [patch: Partial<SetLog>]; remove: [] }>()
     />
     <NumberStepper
       v-if="config.usesWeight"
-      class="set__field"
       compact
-      :label="`charge série ${index + 1}`"
+      :label="`charge série ${number}`"
       unit="kg"
       :step="WEIGHT_STEP_KG"
       :max="1000"
       :model-value="set.weightKg"
       @update:model-value="$emit('update', { weightKg: $event })"
     />
-    <AppButton size="sm" variant="ghost" icon="close" icon-only :label="`Supprimer la série ${index + 1}`" @click="$emit('remove')" />
-  </li>
+    <template #actions>
+      <AppButton size="sm" variant="ghost" icon="close" icon-only :label="`Supprimer la série ${number}`" @click="$emit('remove')" />
+    </template>
+  </CheckableRow>
 </template>
-
-<style scoped>
-.set {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  transition: opacity var(--duration-fast) var(--easing);
-}
-
-.set--done .set__field {
-  opacity: 0.6;
-}
-
-.set__index {
-  width: var(--space-4);
-  color: var(--color-text-faint);
-  text-align: center;
-}
-
-.set__field {
-  flex: 1;
-}
-</style>

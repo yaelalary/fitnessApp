@@ -3,7 +3,7 @@ import type { PerformanceSample } from './metrics'
 import { METRICS } from './metrics'
 import { createId } from './ids'
 import { todayIso } from './dates'
-import { categoryOf } from './categories'
+import { categoryOf, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
 
 export function sortSessionsDesc(sessions: readonly Session[]): Session[] {
@@ -47,6 +47,7 @@ export function createEntry(exercise: Exercise, targets: ExerciseTargets, previo
     durationMinutes: previous?.durationMinutes || targets.durationMinutes,
     distanceKm: previous?.distanceKm ?? 0,
     notes: '',
+    done: false,
   }
 }
 
@@ -113,19 +114,39 @@ export function summarizeSession(session: Session): SessionSummary {
   }
 }
 
-export function completeAllSets(session: Session): Session {
-  return {
-    ...session,
-    entries: session.entries.map((entry) => ({ ...entry, sets: entry.sets.map((set) => ({ ...set, done: true })) })),
-  }
+interface CompletionRule {
+  isPending: (entry: SessionEntry) => boolean
+  isComplete: (entry: SessionEntry) => boolean
+  complete: (entry: SessionEntry) => SessionEntry
 }
 
-export function hasPendingSets(session: Session): boolean {
-  return session.entries.some((entry) => entry.sets.some((set) => !set.done))
+const COMPLETION_RULES: Record<TrackingMode, CompletionRule> = {
+  sets: {
+    isPending: (entry) => entry.sets.some((set) => !set.done),
+    isComplete: (entry) => entry.sets.length > 0 && entry.sets.every((set) => set.done),
+    complete: (entry) => ({ ...entry, sets: entry.sets.map((set) => ({ ...set, done: true })) }),
+  },
+  duration: {
+    isPending: (entry) => !entry.done,
+    isComplete: (entry) => entry.done,
+    complete: (entry) => ({ ...entry, done: true }),
+  },
+}
+
+function completionRuleOf(entry: SessionEntry): CompletionRule {
+  return COMPLETION_RULES[categoryOf(entry.category).tracking]
 }
 
 export function isEntryComplete(entry: SessionEntry): boolean {
-  return entry.sets.length > 0 && entry.sets.every((set) => set.done)
+  return completionRuleOf(entry).isComplete(entry)
+}
+
+export function completeAllEntries(session: Session): Session {
+  return { ...session, entries: session.entries.map((entry) => completionRuleOf(entry).complete(entry)) }
+}
+
+export function hasPendingEntries(session: Session): boolean {
+  return session.entries.some((entry) => completionRuleOf(entry).isPending(entry))
 }
 
 export function describePerformance(entry: SessionEntry): string {

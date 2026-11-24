@@ -5,14 +5,12 @@ import { categoryOf } from '@/domain/categories'
 import { addSet, describePerformance, isEntryComplete, removeSet, updateSet } from '@/domain/sessions'
 import AppButton from '@/components/ui/AppButton.vue'
 import FormField from '@/components/ui/FormField.vue'
-import NumberStepper from '@/components/ui/NumberStepper.vue'
 import DragHandle from '@/components/ui/DragHandle.vue'
 import RemoveItemButton from '@/components/ui/RemoveItemButton.vue'
 import ExerciseSummary from '@/components/exercises/ExerciseSummary.vue'
 import RestTimer from './RestTimer.vue'
+import DurationRow from './DurationRow.vue'
 import SetRow from './SetRow.vue'
-
-const DISTANCE_STEP_KM = 0.1
 
 const props = defineProps<{
   entry: SessionEntry
@@ -62,29 +60,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
       </div>
     </template>
 
-    <div v-else class="grid-2">
-      <FormField v-slot="field" label="Durée">
-        <NumberStepper
-          :id="field.id"
-          label="la durée"
-          unit="min"
-          :max="300"
-          :model-value="entry.durationMinutes"
-          @update:model-value="patch({ durationMinutes: $event })"
-        />
-      </FormField>
-      <FormField v-if="config.usesDistance" v-slot="field" label="Distance">
-        <NumberStepper
-          :id="field.id"
-          label="la distance"
-          unit="km"
-          :step="DISTANCE_STEP_KM"
-          :max="200"
-          :model-value="entry.distanceKm"
-          @update:model-value="patch({ distanceKm: $event })"
-        />
-      </FormField>
-    </div>
+    <DurationRow v-else :entry="entry" :config="config" @update="patch" />
 
     <FormField v-slot="field" label="Note" hide-label>
       <input

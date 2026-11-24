@@ -51,6 +51,7 @@ export interface SessionEntry {
   durationMinutes: number
   distanceKm: number
   notes: string
+  done: boolean
 }
 
 export interface Session {
