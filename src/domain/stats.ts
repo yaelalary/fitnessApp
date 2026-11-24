@@ -74,13 +74,10 @@ export function recentActivity(sessions: readonly Session[], today: string, days
   return recent.reduce<ActivitySummary>(
     (summary, session) => {
       const sessionSummary = summarizeSession(session)
-      const cardioMinutes = session.entries
-        .filter((entry) => entry.category === 'cardio')
-        .reduce((sum, entry) => sum + entry.durationMinutes, 0)
       return {
         sessionCount: summary.sessionCount + 1,
         volumeKg: summary.volumeKg + sessionSummary.volumeKg,
-        cardioMinutes: summary.cardioMinutes + cardioMinutes,
+        cardioMinutes: summary.cardioMinutes + sessionSummary.cardioMinutes,
       }
     },
     { sessionCount: 0, volumeKg: 0, cardioMinutes: 0 },

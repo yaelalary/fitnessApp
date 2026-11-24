@@ -166,7 +166,21 @@ describe('summarizeSession', () => {
       setCount: 2,
       completedSetCount: 2,
       volumeKg: 760,
-      durationMinutes: 0,
+      cardioMinutes: 0,
     })
+  })
+
+  it('n’affiche que le temps de cardio, sans compter l’échauffement', () => {
+    const base = history[0].entries[0]
+    const session: Session = {
+      ...history[0],
+      entries: [
+        { ...base, id: 'w', category: 'warmup', sets: [], durationMinutes: 10 },
+        base,
+        { ...base, id: 'c', category: 'cardio', sets: [], durationMinutes: 25 },
+      ],
+    }
+    expect(summarizeSession(session).cardioMinutes).toBe(25)
+    expect(describeSessionSummary(summarizeSession(session))).toBe('3 exercices · 2 séries · 760 kg soulevés · 25 min de cardio')
   })
 })

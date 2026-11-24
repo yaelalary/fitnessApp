@@ -100,7 +100,13 @@ export interface SessionSummary {
   setCount: number
   completedSetCount: number
   volumeKg: number
-  durationMinutes: number
+  cardioMinutes: number
+}
+
+function cardioMinutesOf(session: Session): number {
+  return session.entries
+    .filter((entry) => entry.category === 'cardio')
+    .reduce((sum, entry) => sum + entry.durationMinutes, 0)
 }
 
 export function summarizeSession(session: Session): SessionSummary {
@@ -110,7 +116,7 @@ export function summarizeSession(session: Session): SessionSummary {
     setCount: sample.sets.length,
     completedSetCount: sample.sets.filter((set) => set.done).length,
     volumeKg: METRICS.volume.compute(sample) ?? 0,
-    durationMinutes: sample.durationMinutes,
+    cardioMinutes: cardioMinutesOf(session),
   }
 }
 
@@ -169,7 +175,7 @@ export function describeSessionSummary(summary: SessionSummary): string {
   const parts = [countLabel(summary.exerciseCount, 'exercice')]
   if (summary.setCount > 0) parts.push(countLabel(summary.setCount, 'série'))
   if (summary.volumeKg > 0) parts.push(`${formatNumber(summary.volumeKg)} kg soulevés`)
-  if (summary.durationMinutes > 0) parts.push(`${formatNumber(summary.durationMinutes)} min`)
+  if (summary.cardioMinutes > 0) parts.push(`${formatNumber(summary.cardioMinutes)} min de cardio`)
   return parts.join(' · ')
 }
 
