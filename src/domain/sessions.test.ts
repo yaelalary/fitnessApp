@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, Routine, Session } from './types'
-import { addSet, createSessionFromRoutine, describePerformance, describeSessionSummary, findLastEntry, removeSet, summarizeSession, updateSet } from './sessions'
+import { addSet, completeAllSets, createSessionFromRoutine, describePerformance, describeSessionSummary, findLastEntry, hasPendingSets, removeSet, summarizeSession, updateSet } from './sessions'
 import { createExercise } from './exercises'
 
 function exercise(id: string, overrides: Partial<Exercise> = {}): Exercise {
@@ -101,6 +101,30 @@ describe('édition des séries', () => {
     expect(removeSet(entry, 0).sets).toHaveLength(1)
     expect(updateSet(entry, 1, { weightKg: 50 }).sets[1].weightKg).toBe(50)
     expect(entry.sets[1].weightKg).toBe(45)
+  })
+})
+
+describe('tout cocher', () => {
+  const session = createSessionFromRoutine(routine, exercisesById, history, '2026-11-22')
+
+  it('signale les séries restant à cocher', () => {
+    expect(hasPendingSets(session)).toBe(true)
+  })
+
+  it('coche toutes les séries sans modifier charges ni répétitions', () => {
+    const completed = completeAllSets(session)
+    expect(hasPendingSets(completed)).toBe(false)
+    expect(completed.entries[1].sets).toEqual(session.entries[1].sets.map((set) => ({ ...set, done: true })))
+    expect(completed.entries[0].durationMinutes).toBe(15)
+  })
+
+  it('ne mute pas la séance d’origine', () => {
+    completeAllSets(session)
+    expect(session.entries[1].sets.every((set) => !set.done)).toBe(true)
+  })
+
+  it('ne signale rien pour une séance sans séries', () => {
+    expect(hasPendingSets({ ...session, entries: [session.entries[0]] })).toBe(false)
   })
 })
 

@@ -113,6 +113,17 @@ export function summarizeSession(session: Session): SessionSummary {
   }
 }
 
+export function completeAllSets(session: Session): Session {
+  return {
+    ...session,
+    entries: session.entries.map((entry) => ({ ...entry, sets: entry.sets.map((set) => ({ ...set, done: true })) })),
+  }
+}
+
+export function hasPendingSets(session: Session): boolean {
+  return session.entries.some((entry) => entry.sets.some((set) => !set.done))
+}
+
 export function isEntryComplete(entry: SessionEntry): boolean {
   return entry.sets.length > 0 && entry.sets.every((set) => set.done)
 }

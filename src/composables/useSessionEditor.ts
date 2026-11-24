@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import type { Exercise, Session, SessionEntry } from '@/domain/types'
 import { cloneData, findById, moveItem, removeById, upsertById } from '@/domain/collections'
-import { createEntry, findLastEntry } from '@/domain/sessions'
+import { completeAllSets, createEntry, findLastEntry } from '@/domain/sessions'
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '@/services/sessionDrafts'
 import { useWorkoutStore } from '@/stores/workout'
 
@@ -40,6 +40,10 @@ export function useSessionEditor(sessionId: string) {
     if (session.value) update({ entries: moveItem(session.value.entries, fromIndex, toIndex) })
   }
 
+  function completeAll() {
+    if (session.value) session.value = completeAllSets(session.value)
+  }
+
   function addExercise(exercise: Exercise) {
     if (!session.value) return
     const previous = findLastEntry(workout.sessions, exercise.id, sessionId)
@@ -75,6 +79,7 @@ export function useSessionEditor(sessionId: string) {
     updateEntry,
     removeEntry,
     moveEntry,
+    completeAll,
     addExercise,
     previousEntryFor,
     save,
