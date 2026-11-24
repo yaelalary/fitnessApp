@@ -1,5 +1,6 @@
 import type { BrandId } from './types'
 import { MACHINE_CATALOG, type MachineModel } from './machineCatalog'
+import { searchableText } from './text'
 
 export type { MachineModel }
 
@@ -68,16 +69,12 @@ export function catalogLines(brand: BrandId | null): string[] {
   return [...new Set(BRANDS[brand].machines.map((machine) => machine.line))]
 }
 
-function searchable(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('fr')
-}
-
 export function filterCatalog(entries: readonly CatalogEntry[], filter: CatalogFilter): CatalogEntry[] {
-  const words = searchable(filter.query).split(/\s+/).filter(Boolean)
+  const words = searchableText(filter.query).split(/\s+/).filter(Boolean)
   return entries.filter((entry) => {
     if (filter.brand && entry.brand !== filter.brand) return false
     if (filter.line && entry.line !== filter.line) return false
-    const haystack = searchable(`${entry.name} ${entry.line} ${BRANDS[entry.brand].label}`)
+    const haystack = searchableText(`${entry.name} ${entry.line} ${BRANDS[entry.brand].label}`)
     return words.every((word) => haystack.includes(word))
   })
 }
@@ -105,19 +102,3 @@ export function machineThumbnailUrl(imageUrl: string | null, width: number): str
     return imageUrl
   }
 }
-
-export const MUSCLE_GROUPS = [
-  'Pectoraux',
-  'Dos',
-  'Épaules',
-  'Biceps',
-  'Triceps',
-  'Abdominaux',
-  'Lombaires',
-  'Quadriceps',
-  'Ischio-jambiers',
-  'Fessiers',
-  'Adducteurs',
-  'Mollets',
-  'Corps entier',
-]

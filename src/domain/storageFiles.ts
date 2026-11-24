@@ -1,6 +1,6 @@
 import type { FileChanges, Profile, WorkoutSnapshot } from './types'
 import { isImageFileName } from './images'
-import { normalizeProfile } from './profiles'
+import { normalizeProfile, serializeProfile } from './profiles'
 
 const PROFILE_FILE_PREFIX = 'profile-'
 const PROFILE_FILE_SUFFIX = '.json'
@@ -37,12 +37,12 @@ export function parseStorageFiles(files: Readonly<Record<string, string>>): Work
 }
 
 export function profileFileChanges(profile: Profile): FileChanges {
-  return { [profileFileName(profile.id)]: JSON.stringify(profile, null, 1) }
+  return { [profileFileName(profile.id)]: serializeProfile(profile) }
 }
 
 export function snapshotToFiles(snapshot: WorkoutSnapshot): Record<string, string> {
   const profileFiles = Object.fromEntries(
-    snapshot.profiles.map((profile) => [profileFileName(profile.id), JSON.stringify(profile, null, 1)]),
+    snapshot.profiles.map((profile) => [profileFileName(profile.id), serializeProfile(profile)]),
   )
   return { [README_FILE_NAME]: README_CONTENT, ...profileFiles, ...snapshot.images }
 }

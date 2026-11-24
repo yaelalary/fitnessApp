@@ -24,6 +24,10 @@ export function moveItem<T>(list: readonly T[], fromIndex: number, toIndex: numb
   return next
 }
 
+export function toggleValue<T>(list: readonly T[], value: T): T[] {
+  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
+}
+
 export function indexById<T extends Identified>(list: readonly T[]): Map<string, T> {
   return new Map(list.map((item) => [item.id, item]))
 }

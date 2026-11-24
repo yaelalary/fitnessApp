@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { reactive } from 'vue'
-import { cloneData, moveItem } from './collections'
+import { cloneData, moveItem, toggleValue } from './collections'
 
 describe('moveItem', () => {
   it('déplace un élément vers le bas ou vers le haut', () => {
@@ -25,5 +25,14 @@ describe('cloneData', () => {
     expect(copy).toEqual({ id: 'e', defaults: { sets: 5 }, tags: ['a', 'b'] })
     expect(stored.defaults.sets).toBe(3)
     expect(stored.tags).toEqual(['a'])
+  })
+})
+
+describe('toggleValue', () => {
+  it('ajoute une valeur absente et retire une valeur présente, sans muter la liste', () => {
+    const list = ['a', 'b']
+    expect(toggleValue(list, 'c')).toEqual(['a', 'b', 'c'])
+    expect(toggleValue(list, 'a')).toEqual(['b'])
+    expect(list).toEqual(['a', 'b'])
   })
 })

@@ -11,6 +11,7 @@ import type {
 import { isBrandId } from './machines'
 import { isCategoryId } from './categories'
 import { createId } from './ids'
+import { describeMuscles, normalizeMuscles } from './muscles'
 import { toSafeNumber } from './numbers'
 import { requiredText } from './validation'
 
@@ -47,7 +48,7 @@ function normalizeExercise(value: unknown): Exercise {
     category: isCategoryId(raw.category) ? raw.category : 'strength',
     brand: isBrandId(raw.brand) ? raw.brand : null,
     machine: asString(raw.machine),
-    muscleGroup: asString(raw.muscleGroup),
+    muscles: normalizeMuscles(raw.muscles, raw.muscleGroup),
     notes: asString(raw.notes),
     image: typeof raw.image === 'string' ? raw.image : null,
     defaults: normalizeTargets(raw.defaults),
@@ -115,6 +116,10 @@ export function normalizeProfile(value: unknown): Profile | null {
   }
 }
 
+export function serializeProfile(profile: Profile): string {
+  const exercises = profile.exercises.map((exercise) => ({ ...exercise, muscleGroup: describeMuscles(exercise.muscles) }))
+  return JSON.stringify({ ...profile, exercises }, null, 1)
+}
 export function createProfile(name: string, now: Date = new Date()): Profile {
   return { id: createId(), name: name.trim(), exercises: [], routines: [], sessions: [], updatedAt: now.toISOString() }
 }

@@ -18,7 +18,7 @@ const invalid = computed<'true' | undefined>(() => (props.error ? 'true' : undef
 
 <template>
   <div class="field">
-    <label :for="id" class="field__label" :class="{ 'visually-hidden': hideLabel }">{{ label }}</label>
+    <label :for="id" class="eyebrow" :class="{ 'visually-hidden': hideLabel }">{{ label }}</label>
     <slot :id="id" :described-by="describedBy" :invalid="invalid" />
     <p v-if="message" :id="messageId" class="field__message" :class="{ 'field__message--error': error }">
       {{ message }}
@@ -32,12 +32,6 @@ const invalid = computed<'true' | undefined>(() => (props.error ? 'true' : undef
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
-}
-
-.field__label {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-muted);
 }
 
 .field__message {

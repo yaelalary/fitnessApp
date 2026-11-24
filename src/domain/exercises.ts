@@ -2,6 +2,8 @@ import type { BrandId, CategoryId, Exercise, ExerciseTargets } from './types'
 import { CATEGORIES, categoryOf } from './categories'
 import { BRANDS, findMachine, type CatalogEntry } from './machines'
 import { createId } from './ids'
+import { describeMuscles } from './muscles'
+import { searchableText } from './text'
 import { formatRest } from './dates'
 import { formatNumber } from './numbers'
 import { nonNegative, requiredText, type ValidationErrors } from './validation'
@@ -15,7 +17,7 @@ export function createExercise(category: CategoryId = 'strength'): Exercise {
     category,
     brand: null,
     machine: '',
-    muscleGroup: '',
+    muscles: [],
     notes: '',
     image: null,
     defaults: { ...CATEGORIES[category].defaults },
@@ -64,7 +66,7 @@ export function describeTargets(targets: ExerciseTargets, category: CategoryId):
 }
 
 export function describeEquipment(exercise: Exercise): string {
-  const parts = [exercise.brand ? BRANDS[exercise.brand].label : '', exercise.machine, exercise.muscleGroup]
+  const parts = [exercise.brand ? BRANDS[exercise.brand].label : '', exercise.machine, describeMuscles(exercise.muscles)]
   return parts.filter(Boolean).join(' · ')
 }
 
@@ -73,11 +75,11 @@ export function sortExercises(exercises: readonly Exercise[]): Exercise[] {
 }
 
 export function filterExercises(exercises: readonly Exercise[], category: CategoryId | null, query: string): Exercise[] {
-  const needle = query.trim().toLocaleLowerCase('fr')
+  const needle = searchableText(query)
   return sortExercises(exercises).filter((exercise) => {
     if (category && exercise.category !== category) return false
     if (!needle) return true
-    const haystack = `${exercise.name} ${exercise.machine} ${exercise.muscleGroup}`.toLocaleLowerCase('fr')
+    const haystack = searchableText(`${exercise.name} ${exercise.machine} ${describeMuscles(exercise.muscles)}`)
     return haystack.includes(needle)
   })
 }

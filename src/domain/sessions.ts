@@ -186,7 +186,7 @@ export function exerciseFromEntry(entry: SessionEntry): Exercise {
     category: entry.category,
     brand: null,
     machine: '',
-    muscleGroup: '',
+    muscles: [],
     notes: '',
     image: null,
     defaults: { sets: entry.sets.length, reps: 0, weightKg: 0, restSeconds: entry.restSeconds, durationMinutes: entry.durationMinutes },

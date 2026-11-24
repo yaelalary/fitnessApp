@@ -78,6 +78,7 @@ input:is(
     [type='tel']
   ),
 select,
+.select-trigger,
 textarea {
   width: 100%;
   min-height: var(--tap-size);
@@ -112,7 +113,8 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
 }
 
-select {
+select,
+.select-trigger {
   padding-right: var(--space-7);
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
     linear-gradient(135deg, currentColor 50%, transparent 50%);
@@ -121,6 +123,13 @@ select {
     calc(100% - 13px) 50%;
   background-size: 5px 5px;
   background-repeat: no-repeat;
+}
+
+
+.select-trigger {
+  display: block;
+  text-align: left;
+  cursor: pointer;
 }
 
 textarea {
@@ -135,6 +144,7 @@ textarea::placeholder {
 
 input:hover,
 select:hover,
+.select-trigger:hover,
 textarea:hover {
   border-color: var(--color-text-muted);
 }

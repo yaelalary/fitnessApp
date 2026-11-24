@@ -16,7 +16,7 @@ export interface Exercise {
   category: CategoryId
   brand: BrandId | null
   machine: string
-  muscleGroup: string
+  muscles: string[]
   notes: string
   image: string | null
   defaults: ExerciseTargets

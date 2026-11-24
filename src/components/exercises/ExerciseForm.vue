@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
+import { computed, ref } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
-import { BRANDS, BRAND_ORDER, MUSCLE_GROUPS, machineImageUrl, type CatalogEntry } from '@/domain/machines'
+import { BRANDS, BRAND_ORDER, machineImageUrl, type CatalogEntry } from '@/domain/machines'
+import { muscleOptionGroups } from '@/domain/muscles'
 import {
   changeExerciseBrand,
   changeExerciseCategory,
@@ -14,6 +15,7 @@ import {
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { cloneData } from '@/domain/collections'
 import AppButton from '@/components/ui/AppButton.vue'
+import MultiSelect from '@/components/ui/MultiSelect.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
 import SegmentedControl, { type SegmentOption } from '@/components/ui/SegmentedControl.vue'
@@ -31,10 +33,10 @@ const emit = defineEmits<{ submit: [exercise: Exercise, image: ImageInput] }>()
 const draft = ref<Exercise>(cloneData(props.exercise))
 const image = ref<ImageInput>({ kind: 'keep' })
 const errors = ref<ValidationErrors<ExerciseField>>({})
-const muscleListId = useId()
 
 const categoryOptions: SegmentOption<CategoryId>[] = CATEGORY_ORDER.map((id) => ({ value: id, label: CATEGORIES[id].label }))
 const config = computed(() => categoryOf(draft.value.category))
+const muscleGroups = computed(() => muscleOptionGroups(draft.value.muscles))
 const catalogImageSrc = computed(() =>
   config.value.usesMachine ? machineImageUrl(draft.value.brand, draft.value.machine) : null,
 )
@@ -87,11 +89,15 @@ function submit() {
       </FormField>
     </div>
 
-    <FormField v-slot="field" label="Groupe musculaire">
-      <input :id="field.id" v-model="draft.muscleGroup" type="text" :list="muscleListId" autocomplete="off" />
-      <datalist :id="muscleListId">
-        <option v-for="muscle in MUSCLE_GROUPS" :key="muscle" :value="muscle" />
-      </datalist>
+    <FormField v-slot="field" label="Muscles travaillés" hint="Plusieurs choix possibles.">
+      <MultiSelect
+        :id="field.id"
+        v-model="draft.muscles"
+        :groups="muscleGroups"
+        title="Muscles travaillés"
+        placeholder="Aucun muscle choisi"
+        :aria-describedby="field.describedBy"
+      />
     </FormField>
 
     <section class="stack">

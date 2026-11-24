@@ -46,11 +46,12 @@ describe('filterExercises', () => {
   it('filtre par catégorie et texte, trié par nom', () => {
     const list = [
       { ...createExercise('strength'), name: 'Leg press', machine: 'Linear Leg Press' },
-      { ...createExercise('strength'), name: 'Développé', muscleGroup: 'Pectoraux' },
+      { ...createExercise('strength'), name: 'Développé', muscles: ['chest-upper'] },
       { ...createExercise('cardio'), name: 'Vélo' },
     ]
     expect(filterExercises(list, 'strength', '').map((item) => item.name)).toEqual(['Développé', 'Leg press'])
     expect(filterExercises(list, null, 'pecto').map((item) => item.name)).toEqual(['Développé'])
+    expect(filterExercises(list, null, 'developpe').map((item) => item.name)).toEqual(['Développé'])
   })
 })
 
