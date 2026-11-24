@@ -2,13 +2,14 @@
 import { computed } from 'vue'
 import type { ActivitySummary } from '@/domain/stats'
 import { formatNumber } from '@/domain/numbers'
+import { METRICS } from '@/domain/metrics'
 import StatTile from '@/components/ui/StatTile.vue'
 
 const props = defineProps<{ activity: ActivitySummary }>()
 
 const tiles = computed(() => [
   { label: 'Séances', value: formatNumber(props.activity.sessionCount), unit: '' },
-  { label: 'Volume', value: formatNumber(Math.round(props.activity.volumeKg)), unit: 'kg' },
+  { label: METRICS.volume.label, value: formatNumber(Math.round(props.activity.volumeKg)), unit: 'kg' },
   { label: 'Cardio', value: formatNumber(props.activity.cardioMinutes), unit: 'min' },
 ])
 </script>

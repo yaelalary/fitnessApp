@@ -62,7 +62,7 @@ export const METRICS: Record<MetricId, MetricDefinition> = {
   },
   volume: {
     id: 'volume',
-    label: 'Volume',
+    label: 'Poids soulevé',
     unit: 'kg',
     compute: (sample) => sumOrNull(workingSets(sample).map((set) => set.reps * set.weightKg)),
   },
