@@ -57,12 +57,16 @@ function onSwitch(event: Event) {
 
 .header__tools {
   flex-wrap: nowrap;
-  gap: var(--space-1);
+  gap: 0;
   min-width: 0;
 }
 
 .header__storage {
   display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: var(--tap-size);
+  padding-inline-end: var(--space-3);
   color: var(--color-text-faint);
 }
 

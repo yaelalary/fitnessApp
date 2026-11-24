@@ -34,6 +34,7 @@ const label = computed(() => (isReady.value ? 'Outils : gourde prête' : `Outils
   align-items: center;
   gap: var(--space-1);
   min-height: var(--tap-size-sm);
+  margin-inline-start: var(--space-2);
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-surface-sunken);
