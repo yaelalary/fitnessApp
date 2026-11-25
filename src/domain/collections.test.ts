@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { reactive } from 'vue'
-import { cloneData, moveItem, toggleValue } from './collections'
+import { cloneData, isSameData, moveItem, toggleValue } from './collections'
 
 describe('moveItem', () => {
   it('déplace un élément vers le bas ou vers le haut', () => {
@@ -34,5 +34,14 @@ describe('toggleValue', () => {
     expect(toggleValue(list, 'c')).toEqual(['a', 'b', 'c'])
     expect(toggleValue(list, 'a')).toEqual(['b'])
     expect(list).toEqual(['a', 'b'])
+  })
+})
+
+describe('isSameData', () => {
+  it('compare le contenu et non la référence', () => {
+    const routine = { name: 'Jambes', items: [{ id: 'a', sets: 3 }] }
+    expect(isSameData(routine, cloneData(routine))).toBe(true)
+    expect(isSameData(routine, { ...routine, items: [{ id: 'a', sets: 4 }] })).toBe(false)
+    expect(isSameData(routine, { ...routine, name: 'Jambes ' })).toBe(false)
   })
 })

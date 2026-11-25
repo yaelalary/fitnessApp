@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
 import { BRANDS, BRAND_ORDER, machineImageUrl, type CatalogEntry } from '@/domain/machines'
 import { muscleOptionGroups } from '@/domain/muscles'
-import {
-  changeExerciseBrand,
-  changeExerciseCategory,
-  selectCatalogMachine,
-  validateExercise,
-  type ExerciseField,
-} from '@/domain/exercises'
-import { hasErrors, type ValidationErrors } from '@/domain/validation'
-import { cloneData } from '@/domain/collections'
+import { changeExerciseBrand, changeExerciseCategory, selectCatalogMachine, type ExerciseField } from '@/domain/exercises'
+import type { ValidationErrors } from '@/domain/validation'
 import AppButton from '@/components/ui/AppButton.vue'
 import MultiSelect from '@/components/ui/MultiSelect.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
@@ -24,51 +17,70 @@ import MachineField from './MachineField.vue'
 import TargetsEditor from './TargetsEditor.vue'
 
 const props = withDefaults(
-  defineProps<{ exercise: Exercise; imageSrc: string | null; submitting?: boolean; error?: string | null }>(),
+  defineProps<{
+    draft: Exercise
+    image: ImageInput
+    errors: ValidationErrors<ExerciseField>
+    imageSrc: string | null
+    submitting?: boolean
+    error?: string | null
+  }>(),
   { submitting: false, error: null },
 )
 
-const emit = defineEmits<{ submit: [exercise: Exercise, image: ImageInput] }>()
-
-const draft = ref<Exercise>(cloneData(props.exercise))
-const image = ref<ImageInput>({ kind: 'keep' })
-const errors = ref<ValidationErrors<ExerciseField>>({})
+const emit = defineEmits<{ 'update:draft': [draft: Exercise]; 'update:image': [image: ImageInput]; submit: [] }>()
 
 const categoryOptions: SegmentOption<CategoryId>[] = CATEGORY_ORDER.map((id) => ({ value: id, label: CATEGORIES[id].label }))
-const config = computed(() => categoryOf(draft.value.category))
-const muscleGroups = computed(() => muscleOptionGroups(draft.value.muscles))
+const config = computed(() => categoryOf(props.draft.category))
+const muscleGroups = computed(() => muscleOptionGroups(props.draft.muscles))
 const catalogImageSrc = computed(() =>
-  config.value.usesMachine ? machineImageUrl(draft.value.brand, draft.value.machine) : null,
+  config.value.usesMachine ? machineImageUrl(props.draft.brand, props.draft.machine) : null,
 )
+const imageAlt = computed(() => props.draft.machine || props.draft.name)
+
+function replaceDraft(draft: Exercise) {
+  emit('update:draft', draft)
+}
+
+function draftField<K extends 'name' | 'machine' | 'muscles' | 'defaults' | 'notes'>(key: K) {
+  return computed<Exercise[K]>({
+    get: () => props.draft[key],
+    set: (value) => replaceDraft({ ...props.draft, [key]: value }),
+  })
+}
+
+const name = draftField('name')
+const machine = draftField('machine')
+const muscles = draftField('muscles')
+const defaults = draftField('defaults')
+const notes = draftField('notes')
+const image = computed<ImageInput>({
+  get: () => props.image,
+  set: (value) => emit('update:image', value),
+})
 
 function setCategory(category: CategoryId) {
-  draft.value = changeExerciseCategory(draft.value, category)
+  replaceDraft(changeExerciseCategory(props.draft, category))
 }
 
 function setBrand(event: Event) {
   const value = (event.target as HTMLSelectElement).value
-  draft.value = changeExerciseBrand(draft.value, value === '' ? null : (value as BrandId))
+  replaceDraft(changeExerciseBrand(props.draft, value === '' ? null : (value as BrandId)))
 }
 
 function pickMachine(entry: CatalogEntry) {
-  draft.value = selectCatalogMachine(draft.value, entry)
-}
-
-function submit() {
-  errors.value = validateExercise(draft.value)
-  if (hasErrors(errors.value)) return
-  emit('submit', draft.value, image.value)
+  replaceDraft(selectCatalogMachine(props.draft, entry))
 }
 </script>
 
 <template>
-  <form class="stack-lg" novalidate @submit.prevent="submit">
+  <form class="stack-lg" novalidate @submit.prevent="emit('submit')">
     <SegmentedControl :model-value="draft.category" :options="categoryOptions" label="Catégorie" @update:model-value="setCategory" />
 
     <FormField v-slot="field" label="Nom de l’exercice" :error="errors.name">
       <input
         :id="field.id"
-        v-model="draft.name"
+        v-model="name"
         type="text"
         autocomplete="off"
         placeholder="Développé couché, rameur…"
@@ -79,7 +91,7 @@ function submit() {
 
     <div v-if="config.usesMachine" class="stack">
       <FormField v-slot="field" label="Machine">
-        <MachineField :id="field.id" v-model="draft.machine" :brand="draft.brand" @pick="pickMachine" />
+        <MachineField :id="field.id" v-model="machine" :brand="draft.brand" @pick="pickMachine" />
       </FormField>
       <FormField v-slot="field" label="Marque" hint="Remplie toute seule quand tu choisis une machine du catalogue.">
         <select :id="field.id" :value="draft.brand ?? ''" :aria-describedby="field.describedBy" @change="setBrand">
@@ -92,7 +104,7 @@ function submit() {
     <FormField v-slot="field" label="Muscles travaillés" hint="Plusieurs choix possibles.">
       <MultiSelect
         :id="field.id"
-        v-model="draft.muscles"
+        v-model="muscles"
         :groups="muscleGroups"
         title="Muscles travaillés"
         placeholder="Aucun muscle choisi"
@@ -102,16 +114,16 @@ function submit() {
 
     <section class="stack">
       <h2 class="section-title">Objectif par défaut</h2>
-      <TargetsEditor v-model:targets="draft.defaults" :category="draft.category" :errors="errors" />
+      <TargetsEditor v-model:targets="defaults" :category="draft.category" :errors="errors" />
     </section>
 
     <section class="stack">
       <h2 class="section-title">Photo de la machine</h2>
-      <ImagePicker v-model="image" :current-src="imageSrc" :fallback-src="catalogImageSrc" :alt="draft.machine || draft.name" />
+      <ImagePicker v-model="image" :current-src="imageSrc" :fallback-src="catalogImageSrc" :alt="imageAlt" />
     </section>
 
     <FormField v-slot="field" label="Notes" hint="Réglages du siège, prise, consignes…">
-      <textarea :id="field.id" v-model="draft.notes" :aria-describedby="field.describedBy" />
+      <textarea :id="field.id" v-model="notes" :aria-describedby="field.describedBy" />
     </FormField>
 
     <ErrorMessage v-if="error" :message="error" />

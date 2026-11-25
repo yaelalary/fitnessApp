@@ -3,11 +3,12 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Exercise, ExerciseTargets, Routine } from '@/domain/types'
 import { createRoutine, createRoutineItem, validateRoutine, type RoutineField } from '@/domain/routines'
-import { cloneData, findById, moveItem, removeById } from '@/domain/collections'
+import { cloneData, findById, isSameData, moveItem, removeById } from '@/domain/collections'
 import { exerciseImageSrc } from '@/domain/images'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useLeaveGuard } from '@/composables/useLeaveGuard'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDialog from '@/components/ui/AppDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -17,6 +18,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import ExercisePicker from '@/components/exercises/ExercisePicker.vue'
 import RoutineItemRow from '@/components/routines/RoutineItemRow.vue'
 import SortableList from '@/components/ui/SortableList.vue'
+import UnsavedChangesDialog from '@/components/ui/UnsavedChangesDialog.vue'
 
 const props = defineProps<{ id?: string }>()
 
@@ -27,6 +29,7 @@ const { busy, error, run } = useAsyncAction()
 const existing = props.id === undefined ? null : (findById(workout.routines, props.id) ?? null)
 const notFound = props.id !== undefined && existing === null
 const draft = ref<Routine>(existing ? cloneData(existing) : createRoutine())
+const baseline = cloneData(draft.value)
 const errors = ref<ValidationErrors<RoutineField>>({})
 const pickerOpen = ref(false)
 
@@ -67,19 +70,25 @@ function removeItem(itemId: string) {
   draft.value.items = removeById(draft.value.items, itemId)
 }
 
-async function save() {
+async function persist(): Promise<boolean> {
   errors.value = validateRoutine(draft.value)
-  if (hasErrors(errors.value)) return
-  await run(async () => {
-    await workout.saveRoutine(draft.value)
-    await router.push({ name: 'routines' })
-  })
+  if (hasErrors(errors.value)) return false
+  return (await run(() => workout.saveRoutine(draft.value).then(() => true))) === true
+}
+
+const leaveGuard = useLeaveGuard({ isDirty: () => !isSameData(draft.value, baseline), save: persist })
+
+async function save() {
+  if (!(await persist())) return
+  leaveGuard.allowLeave()
+  await router.push({ name: 'routines' })
 }
 
 async function remove() {
   if (!existing || !window.confirm(`Supprimer le parcours « ${existing.name} » ? Tes séances passées sont conservées.`)) return
   await run(async () => {
     await workout.deleteRoutine(existing.id)
+    leaveGuard.allowLeave()
     await router.push({ name: 'routines' })
   })
 }
@@ -140,5 +149,12 @@ async function remove() {
     <AppDialog :open="pickerOpen" title="Ajouter un exercice" @close="pickerOpen = false">
       <ExercisePicker :exercises="workout.exercises" :images="workout.images" @pick="addExercise" />
     </AppDialog>
+
+    <UnsavedChangesDialog
+      :open="leaveGuard.open.value"
+      :can-save="leaveGuard.canSave"
+      :saving="leaveGuard.saving.value"
+      @choose="leaveGuard.choose"
+    />
   </div>
 </template>

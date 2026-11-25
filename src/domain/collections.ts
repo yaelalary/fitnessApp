@@ -35,3 +35,7 @@ export function indexById<T extends Identified>(list: readonly T[]): Map<string,
 export function cloneData<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
 }
+
+export function isSameData(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b)
+}

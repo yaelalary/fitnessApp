@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, useSlots, watch } from 'vue'
 import AppButton from './AppButton.vue'
 
 const props = withDefaults(defineProps<{ open: boolean; title: string; fullscreen?: boolean }>(), { fullscreen: false })
 const emit = defineEmits<{ close: [] }>()
 
 const dialog = ref<HTMLDialogElement | null>(null)
+const slots = useSlots()
+const hasFooter = computed(() => props.open && slots.footer !== undefined)
 
 watch(
   () => [props.open, dialog.value] as const,
@@ -27,6 +29,9 @@ watch(
     <div class="dialog__body">
       <slot v-if="open" />
     </div>
+    <footer v-if="hasFooter" class="dialog__footer">
+      <slot name="footer" />
+    </footer>
   </dialog>
 </template>
 
@@ -61,5 +66,9 @@ watch(
 .dialog__body {
   overflow-y: auto;
   padding: var(--space-4) var(--space-5) var(--space-5);
+}
+.dialog__footer {
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-width) solid var(--color-border);
 }
 </style>
