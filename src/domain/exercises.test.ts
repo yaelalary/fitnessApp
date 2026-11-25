@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { changeExerciseCategory, createExercise, describeTargets, filterExercises, validateExercise } from './exercises'
 import { moveItem, upsertById } from './collections'
-import { formatRest, startOfWeekIso } from './dates'
+import { formatDuration, formatRest, joinMinutes, splitMinutes, startOfWeekIso } from './dates'
 import { validateRoutine, removeExerciseFromRoutines, createRoutine } from './routines'
 import { hasErrors } from './validation'
 
@@ -90,5 +90,28 @@ describe('dates', () => {
   it('trouve le lundi de la semaine', () => {
     expect(startOfWeekIso('2026-11-22')).toBe('2026-11-16')
     expect(startOfWeekIso('2026-11-16')).toBe('2026-11-16')
+  })
+})
+
+describe('durées en minutes et secondes', () => {
+  it('découpe et recompose une durée sans perte', () => {
+    expect(splitMinutes(0.5)).toEqual({ minutes: 0, seconds: 30 })
+    expect(splitMinutes(20)).toEqual({ minutes: 20, seconds: 0 })
+    expect(splitMinutes(1.75)).toEqual({ minutes: 1, seconds: 45 })
+    expect(joinMinutes({ minutes: 1, seconds: 45 })).toBe(1.75)
+    expect(splitMinutes(joinMinutes({ minutes: 2, seconds: 10 }))).toEqual({ minutes: 2, seconds: 10 })
+  })
+
+  it('ignore une durée négative', () => {
+    expect(splitMinutes(-3)).toEqual({ minutes: 0, seconds: 0 })
+  })
+
+  it('affiche les secondes quand il y en a', () => {
+    expect(formatDuration(0.5)).toBe('30 s')
+    expect(formatDuration(1.5)).toBe('1 min 30')
+    expect(formatDuration(20)).toBe('20 min')
+    expect(formatDuration(0)).toBe('')
+    expect(describeTargets({ sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 0.5 }, 'warmup')).toBe('30 s')
+    expect(describeTargets({ sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 0 }, 'warmup')).toBe('Durée libre')
   })
 })

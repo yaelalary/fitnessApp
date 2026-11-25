@@ -10,7 +10,7 @@ const props = defineProps<{ activity: ActivitySummary }>()
 const tiles = computed(() => [
   { label: 'Séances', value: formatNumber(props.activity.sessionCount), unit: '' },
   { label: METRICS.volume.label, ...formatMass(props.activity.volumeKg) },
-  { label: 'Cardio', value: formatNumber(props.activity.cardioMinutes), unit: 'min' },
+  { label: 'Cardio', value: formatNumber(Math.round(props.activity.cardioMinutes)), unit: 'min' },
 ])
 </script>
 

@@ -5,6 +5,7 @@ import type { ExerciseField } from '@/domain/exercises'
 import type { ValidationErrors } from '@/domain/validation'
 import { categoryOf, REST_STEP_SECONDS, WEIGHT_STEP_KG } from '@/domain/categories'
 import FormField from '@/components/ui/FormField.vue'
+import DurationInput from '@/components/ui/DurationInput.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
 
 const props = withDefaults(
@@ -75,13 +76,9 @@ function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[
     </FormField>
   </div>
   <FormField v-else v-slot="field" label="Durée" :error="errors.durationMinutes">
-    <NumberStepper
+    <DurationInput
       :id="field.id"
-      :described-by="field.describedBy"
-      :invalid="field.invalid"
       label="la durée"
-      unit="min"
-      :max="300"
       :model-value="targets.durationMinutes"
       @update:model-value="update('durationMinutes', $event)"
     />

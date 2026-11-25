@@ -2,7 +2,7 @@ import type { Exercise, ExerciseTargets, Routine, Session, SessionEntry, SetLog 
 import type { PerformanceSample } from './metrics'
 import { METRICS } from './metrics'
 import { createId } from './ids'
-import { todayIso } from './dates'
+import { formatDuration, todayIso } from './dates'
 import { categoryOf, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
 
@@ -158,7 +158,7 @@ export function hasPendingEntries(session: Session): boolean {
 export function describePerformance(entry: SessionEntry): string {
   const config = categoryOf(entry.category)
   if (config.tracking === 'duration') {
-    const parts = [entry.durationMinutes > 0 ? `${formatNumber(entry.durationMinutes)} min` : '']
+    const parts = [formatDuration(entry.durationMinutes)]
     if (config.usesDistance && entry.distanceKm > 0) parts.push(`${formatNumber(entry.distanceKm)} km`)
     return parts.filter(Boolean).join(' · ')
   }
@@ -175,7 +175,7 @@ export function describeSessionSummary(summary: SessionSummary): string {
   const parts = [countLabel(summary.exerciseCount, 'exercice')]
   if (summary.setCount > 0) parts.push(countLabel(summary.setCount, 'série'))
   if (summary.volumeKg > 0) parts.push(`${formatNumber(summary.volumeKg)} kg soulevés`)
-  if (summary.cardioMinutes > 0) parts.push(`${formatNumber(summary.cardioMinutes)} min de cardio`)
+  if (summary.cardioMinutes > 0) parts.push(`${formatDuration(summary.cardioMinutes)} de cardio`)
   return parts.join(' · ')
 }
 

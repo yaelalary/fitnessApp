@@ -179,10 +179,11 @@ describe('summarizeSession', () => {
         { ...base, id: 'w', category: 'warmup', sets: [], durationMinutes: 10 },
         base,
         { ...base, id: 'c', category: 'cardio', sets: [], durationMinutes: 25 },
+        { ...base, id: 'c2', category: 'cardio', sets: [], durationMinutes: 0.5 },
       ],
     }
-    expect(summarizeSession(session).cardioMinutes).toBe(25)
-    expect(describeSessionSummary(summarizeSession(session))).toBe('3 exercices · 2 séries · 760 kg soulevés · 25 min de cardio')
+    expect(summarizeSession(session).cardioMinutes).toBe(25.5)
+    expect(describeSessionSummary(summarizeSession(session))).toBe('4 exercices · 2 séries · 760 kg soulevés · 25 min 30 de cardio')
   })
 })
 

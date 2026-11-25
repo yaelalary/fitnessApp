@@ -64,3 +64,24 @@ export function formatClock(totalSeconds: number): string {
   const seconds = safe % 60
   return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
+
+const SECONDS_PER_MINUTE = 60
+
+export interface MinutesAndSeconds {
+  minutes: number
+  seconds: number
+}
+
+export function splitMinutes(totalMinutes: number): MinutesAndSeconds {
+  const totalSeconds = Math.max(0, Math.round(totalMinutes * SECONDS_PER_MINUTE))
+  return { minutes: Math.floor(totalSeconds / SECONDS_PER_MINUTE), seconds: totalSeconds % SECONDS_PER_MINUTE }
+}
+
+export function joinMinutes({ minutes, seconds }: MinutesAndSeconds): number {
+  return (minutes * SECONDS_PER_MINUTE + seconds) / SECONDS_PER_MINUTE
+}
+
+export function formatDuration(totalMinutes: number): string {
+  const totalSeconds = Math.round(totalMinutes * SECONDS_PER_MINUTE)
+  return totalSeconds > 0 ? formatRest(totalSeconds) : ''
+}

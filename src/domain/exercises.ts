@@ -4,7 +4,7 @@ import { BRANDS, findMachine, type CatalogEntry } from './machines'
 import { createId } from './ids'
 import { describeMuscles } from './muscles'
 import { searchableText } from './text'
-import { formatRest } from './dates'
+import { formatDuration, formatRest } from './dates'
 import { formatNumber } from './numbers'
 import { nonNegative, requiredText, type ValidationErrors } from './validation'
 
@@ -57,7 +57,7 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
 export function describeTargets(targets: ExerciseTargets, category: CategoryId): string {
   const config = categoryOf(category)
   if (config.tracking === 'duration') {
-    return targets.durationMinutes > 0 ? `${formatNumber(targets.durationMinutes)} min` : 'Durée libre'
+    return formatDuration(targets.durationMinutes) || 'Durée libre'
   }
   const parts = [`${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`]
   if (config.usesWeight && targets.weightKg > 0) parts.push(`${formatNumber(targets.weightKg)} kg`)
