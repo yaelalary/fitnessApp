@@ -8,8 +8,10 @@ import { formatLongDate } from '@/domain/dates'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useSessionEditor } from '@/composables/useSessionEditor'
+import { useConfirm } from '@/composables/useConfirm'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDialog from '@/components/ui/AppDialog.vue'
+import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
@@ -26,6 +28,7 @@ const editor = useSessionEditor(props.id)
 const { session, saved, hasUnsavedChanges } = editor
 const { busy, error, run } = useAsyncAction()
 const pickerOpen = ref(false)
+const confirm = useConfirm()
 
 const subtitle = computed(() => (session.value ? formatLongDate(session.value.date) : ''))
 const rows = computed(() =>
@@ -80,13 +83,26 @@ async function save() {
 }
 
 async function discard() {
-  if (!window.confirm('Les modifications non enregistrées de cette séance seront perdues.')) return
+  const confirmed = await confirm.ask({
+    title: saved.value ? 'Annuler les modifications ?' : 'Abandonner la séance ?',
+    message: 'Les modifications non enregistrées de cette séance seront perdues.',
+    confirmLabel: saved.value ? 'Effacer' : 'Abandonner',
+    cancelLabel: 'Continuer',
+    destructive: true,
+  })
+  if (!confirmed) return
   editor.discard()
   await router.push({ name: saved.value ? 'sessions' : 'home' })
 }
 
 async function remove() {
-  if (!window.confirm('Supprimer définitivement cette séance ?')) return
+  const confirmed = await confirm.ask({
+    title: 'Supprimer la séance ?',
+    message: 'Elle disparaîtra de ton historique et de tes statistiques.',
+    confirmLabel: 'Supprimer',
+    destructive: true,
+  })
+  if (!confirmed) return
   await run(async () => {
     await editor.remove()
     await router.push({ name: 'sessions' })
@@ -156,5 +172,7 @@ async function remove() {
     <AppDialog :open="pickerOpen" title="Ajouter un exercice" @close="pickerOpen = false">
       <ExercisePicker :exercises="workout.exercises" :images="workout.images" @pick="addExercise" />
     </AppDialog>
+
+    <ConfirmActionDialog :request="confirm.request.value" @respond="confirm.respond" />
   </div>
 </template>

@@ -8,7 +8,9 @@ import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useExerciseEditor } from '@/composables/useExerciseEditor'
 import { useLeaveGuard } from '@/composables/useLeaveGuard'
+import { useConfirm } from '@/composables/useConfirm'
 import AppButton from '@/components/ui/AppButton.vue'
+import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UnsavedChangesDialog from '@/components/ui/UnsavedChangesDialog.vue'
@@ -20,6 +22,7 @@ const route = useRoute()
 const router = useRouter()
 const workout = useWorkoutStore()
 const { busy, error, run } = useAsyncAction()
+const confirm = useConfirm()
 
 const listCategory = categoryFromRoute(route)
 const listRoute = exerciseListRoute(listCategory)
@@ -45,7 +48,14 @@ async function save() {
 }
 
 async function remove() {
-  if (!existing || !window.confirm(`Supprimer « ${existing.name} » ? Il sera retiré de tes parcours.`)) return
+  if (!existing) return
+  const confirmed = await confirm.ask({
+    title: 'Supprimer l’exercice ?',
+    message: `« ${existing.name} » sera supprimé et retiré de tes parcours. Tes séances passées sont conservées.`,
+    confirmLabel: 'Supprimer',
+    destructive: true,
+  })
+  if (!confirmed) return
   await run(async () => {
     await workout.deleteExercise(existing.id)
     leaveGuard.allowLeave()
@@ -81,5 +91,6 @@ async function remove() {
       :saving="leaveGuard.saving.value"
       @choose="leaveGuard.choose"
     />
+    <ConfirmActionDialog :request="confirm.request.value" @respond="confirm.respond" />
   </div>
 </template>

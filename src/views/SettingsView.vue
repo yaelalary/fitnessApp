@@ -3,6 +3,8 @@ import type { Profile } from '@/domain/types'
 import { useSettingsStore } from '@/stores/settings'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useConfirm } from '@/composables/useConfirm'
+import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import ProfilesManager from '@/components/profiles/ProfilesManager.vue'
 import GistSettings from '@/components/settings/GistSettings.vue'
@@ -11,6 +13,7 @@ const settings = useSettingsStore()
 const workout = useWorkoutStore()
 const profileAction = useAsyncAction()
 const gistAction = useAsyncAction()
+const confirm = useConfirm()
 
 function createProfile(name: string) {
   profileAction.run(() => workout.addProfile(name))
@@ -20,9 +23,14 @@ function renameProfile(profileId: string, name: string) {
   profileAction.run(() => workout.renameProfile(profileId, name))
 }
 
-function removeProfile(profile: Profile) {
-  const message = `Supprimer le profil « ${profile.name} » et toutes ses données (exercices, parcours, séances) ?`
-  if (window.confirm(message)) profileAction.run(() => workout.deleteProfile(profile.id))
+async function removeProfile(profile: Profile) {
+  const confirmed = await confirm.ask({
+    title: 'Supprimer le profil ?',
+    message: `Le profil « ${profile.name} » et toutes ses données (exercices, parcours, séances) seront supprimés.`,
+    confirmLabel: 'Supprimer',
+    destructive: true,
+  })
+  if (confirmed) await profileAction.run(() => workout.deleteProfile(profile.id))
 }
 
 function connect(gistId: string, token: string) {
@@ -33,10 +41,13 @@ function createGist(token: string) {
   gistAction.run(() => workout.createGistFromCurrentData(token))
 }
 
-function disconnect() {
-  if (window.confirm('Cet appareil n’utilisera plus le gist. Les données du gist ne sont pas supprimées.')) {
-    gistAction.run(() => workout.disconnectGist())
-  }
+async function disconnect() {
+  const confirmed = await confirm.ask({
+    title: 'Déconnecter le gist ?',
+    message: 'Cet appareil n’utilisera plus le gist. Les données du gist ne sont pas supprimées.',
+    confirmLabel: 'Déconnecter',
+  })
+  if (confirmed) await gistAction.run(() => workout.disconnectGist())
 }
 </script>
 
@@ -71,5 +82,7 @@ function disconnect() {
         @disconnect="disconnect"
       />
     </section>
+
+    <ConfirmActionDialog :request="confirm.request.value" @respond="confirm.respond" />
   </div>
 </template>

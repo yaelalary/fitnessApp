@@ -9,8 +9,10 @@ import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLeaveGuard } from '@/composables/useLeaveGuard'
+import { useConfirm } from '@/composables/useConfirm'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDialog from '@/components/ui/AppDialog.vue'
+import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
@@ -32,6 +34,7 @@ const draft = ref<Routine>(existing ? cloneData(existing) : createRoutine())
 const baseline = cloneData(draft.value)
 const errors = ref<ValidationErrors<RoutineField>>({})
 const pickerOpen = ref(false)
+const confirm = useConfirm()
 
 const title = computed(() => (existing ? existing.name : 'Nouveau parcours'))
 const rows = computed(() =>
@@ -85,7 +88,14 @@ async function save() {
 }
 
 async function remove() {
-  if (!existing || !window.confirm(`Supprimer le parcours « ${existing.name} » ? Tes séances passées sont conservées.`)) return
+  if (!existing) return
+  const confirmed = await confirm.ask({
+    title: 'Supprimer le parcours ?',
+    message: `« ${existing.name} » sera supprimé. Tes séances passées sont conservées.`,
+    confirmLabel: 'Supprimer',
+    destructive: true,
+  })
+  if (!confirmed) return
   await run(async () => {
     await workout.deleteRoutine(existing.id)
     leaveGuard.allowLeave()
@@ -156,5 +166,6 @@ async function remove() {
       :saving="leaveGuard.saving.value"
       @choose="leaveGuard.choose"
     />
+    <ConfirmActionDialog :request="confirm.request.value" @respond="confirm.respond" />
   </div>
 </template>
