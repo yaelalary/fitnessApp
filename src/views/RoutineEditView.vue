@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Exercise, ExerciseTargets, Routine } from '@/domain/types'
+import type { Exercise, Routine, RoutineItem } from '@/domain/types'
 import { createRoutine, createRoutineItem, validateRoutine, type RoutineField } from '@/domain/routines'
 import { cloneData, findById, isSameData, moveItem, removeById } from '@/domain/collections'
 import { exerciseImageSrc } from '@/domain/images'
@@ -51,8 +51,8 @@ function addExercise(exercise: Exercise) {
   pickerOpen.value = false
 }
 
-function updateTargets(itemId: string, targets: ExerciseTargets) {
-  draft.value.items = draft.value.items.map((item) => (item.id === itemId ? { ...item, targets } : item))
+function updateItem(itemId: string, changes: Partial<RoutineItem>) {
+  draft.value.items = draft.value.items.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
 }
 
 type Row = (typeof rows.value)[number]
@@ -134,7 +134,8 @@ async function remove() {
               :exercise="row.exercise"
               :image-src="row.imageSrc"
               :index="index"
-              @update:targets="updateTargets(row.item.id, $event)"
+              @update:targets="updateItem(row.item.id, { targets: $event })"
+              @update:notes="updateItem(row.item.id, { notes: $event })"
               @move="moveBy(row, $event)"
               @remove="removeItem(row.item.id)"
             />

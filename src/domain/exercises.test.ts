@@ -63,7 +63,7 @@ describe('routines', () => {
   })
 
   it('retire un exercice supprimé des parcours', () => {
-    const routine = { ...createRoutine(), items: [{ id: 'i', exerciseId: 'x', targets: createExercise().defaults }] }
+    const routine = { ...createRoutine(), items: [{ id: 'i', exerciseId: 'x', targets: createExercise().defaults, notes: '' }] }
     expect(removeExerciseFromRoutines([routine], 'x')[0].items).toEqual([])
   })
 })

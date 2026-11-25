@@ -57,7 +57,12 @@ function normalizeExercise(value: unknown): Exercise {
 
 function normalizeRoutineItem(value: unknown): RoutineItem {
   const raw = asRecord(value)
-  return { id: asString(raw.id, createId()), exerciseId: asString(raw.exerciseId), targets: normalizeTargets(raw.targets) }
+  return {
+    id: asString(raw.id, createId()),
+    exerciseId: asString(raw.exerciseId),
+    targets: normalizeTargets(raw.targets),
+    notes: asString(raw.notes),
+  }
 }
 
 function normalizeRoutine(value: unknown): Routine {

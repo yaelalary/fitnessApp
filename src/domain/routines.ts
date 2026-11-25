@@ -9,7 +9,7 @@ export function createRoutine(): Routine {
 }
 
 export function createRoutineItem(exercise: Exercise): RoutineItem {
-  return { id: createId(), exerciseId: exercise.id, targets: { ...exercise.defaults } }
+  return { id: createId(), exerciseId: exercise.id, targets: { ...exercise.defaults }, notes: '' }
 }
 
 export function validateRoutine(routine: Routine): ValidationErrors<RoutineField> {
@@ -17,6 +17,10 @@ export function validateRoutine(routine: Routine): ValidationErrors<RoutineField
     name: requiredText(routine.name, 'Donne un nom au parcours.'),
     items: routine.items.length === 0 ? 'Ajoute au moins un exercice.' : undefined,
   }
+}
+
+export function routineItemNote(routine: Routine | null, exerciseId: string): string {
+  return routine?.items.find((item) => item.exerciseId === exerciseId)?.notes.trim() ?? ''
 }
 
 export function removeExerciseFromRoutines(routines: readonly Routine[], exerciseId: string): Routine[] {

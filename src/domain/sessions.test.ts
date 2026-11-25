@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Exercise, Routine, Session } from './types'
 import { addSet, completeAllEntries, createSessionFromRoutine, describePerformance, describeSessionSummary, findLastEntry, hasPendingEntries, isEntryComplete, removeSet, summarizeSession, updateSet } from './sessions'
 import { createExercise } from './exercises'
+import { routineItemNote } from './routines'
 
 function exercise(id: string, overrides: Partial<Exercise> = {}): Exercise {
   return { ...createExercise('strength'), id, name: id, ...overrides }
@@ -16,9 +17,9 @@ const routine: Routine = {
   name: 'Haut du corps',
   notes: '',
   items: [
-    { id: 'i1', exerciseId: 'bike', targets: bike.defaults },
-    { id: 'i2', exerciseId: 'press', targets: { sets: 4, reps: 8, weightKg: 0, restSeconds: 120, durationMinutes: 0 } },
-    { id: 'i3', exerciseId: 'deleted', targets: press.defaults },
+    { id: 'i1', exerciseId: 'bike', targets: bike.defaults, notes: '' },
+    { id: 'i2', exerciseId: 'press', targets: { sets: 4, reps: 8, weightKg: 0, restSeconds: 120, durationMinutes: 0 }, notes: 'Siège cran 4' },
+    { id: 'i3', exerciseId: 'deleted', targets: press.defaults, notes: '' },
   ],
 }
 
@@ -78,7 +79,7 @@ describe('createSessionFromRoutine', () => {
 describe('charge par défaut', () => {
   it('pré-remplit les séries avec la charge de l’exercice quand il n’y a pas d’historique', () => {
     const heavy = { ...press, defaults: { ...press.defaults, weightKg: 50 } }
-    const single: Routine = { ...routine, items: [{ id: 'i', exerciseId: 'press', targets: heavy.defaults }] }
+    const single: Routine = { ...routine, items: [{ id: 'i', exerciseId: 'press', targets: heavy.defaults, notes: '' }] }
     const session = createSessionFromRoutine(single, new Map([['press', heavy]]), [], '2026-11-22')
     expect(session.entries[0].sets.map((set) => set.weightKg)).toEqual([50, 50, 50])
   })
@@ -182,5 +183,14 @@ describe('summarizeSession', () => {
     }
     expect(summarizeSession(session).cardioMinutes).toBe(25)
     expect(describeSessionSummary(summarizeSession(session))).toBe('3 exercices · 2 séries · 760 kg soulevés · 25 min de cardio')
+  })
+})
+
+describe('routineItemNote', () => {
+  it('retrouve la consigne du parcours pour un exercice', () => {
+    expect(routineItemNote(routine, 'press')).toBe('Siège cran 4')
+    expect(routineItemNote(routine, 'bike')).toBe('')
+    expect(routineItemNote(routine, 'inconnu')).toBe('')
+    expect(routineItemNote(null, 'press')).toBe('')
   })
 })

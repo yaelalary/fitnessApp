@@ -104,6 +104,15 @@ describe('normalizeProfile', () => {
     expect(profile?.sessions[0].entries.map((entry) => entry.done)).toEqual([true, false])
   })
 
+  it('garde la note des exercices de parcours et la crée vide sur les anciens parcours', () => {
+    const profile = normalizeProfile({
+      id: 'p',
+      name: 'Alex',
+      routines: [{ id: 'r', name: 'Jambes', items: [{ id: 'a', exerciseId: 'x', notes: 'Pieds hauts' }, { id: 'b', exerciseId: 'y' }] }],
+    })
+    expect(profile?.routines[0].items.map((item) => item.notes)).toEqual(['Pieds hauts', ''])
+  })
+
   it('rejette un profil sans identifiant', () => {
     expect(normalizeProfile({ name: 'x' })).toBeNull()
   })

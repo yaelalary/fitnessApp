@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Exercise } from '@/domain/types'
 import { exerciseFromEntry, hasPendingEntries } from '@/domain/sessions'
+import { routineItemNote } from '@/domain/routines'
+import { findById } from '@/domain/collections'
 import { exerciseImageSrc } from '@/domain/images'
 import { formatLongDate } from '@/domain/dates'
 import { useWorkoutStore } from '@/stores/workout'
@@ -30,6 +32,10 @@ const { busy, error, run } = useAsyncAction()
 const pickerOpen = ref(false)
 const confirm = useConfirm()
 
+const routine = computed(() => {
+  const routineId = session.value?.routineId
+  return routineId ? (findById(workout.routines, routineId) ?? null) : null
+})
 const subtitle = computed(() => (session.value ? formatLongDate(session.value.date) : ''))
 const rows = computed(() =>
   (session.value?.entries ?? []).map((entry, index) => {
@@ -40,6 +46,7 @@ const rows = computed(() =>
       exercise,
       imageSrc: exerciseImageSrc(exercise, workout.images),
       previous: editor.previousEntryFor(entry.exerciseId),
+      routineNote: routineItemNote(routine.value, entry.exerciseId),
     }
   }),
 )
@@ -143,6 +150,7 @@ async function remove() {
             :exercise="row.exercise"
             :image-src="row.imageSrc"
             :previous="row.previous"
+            :routine-note="row.routineNote"
             @update="editor.updateEntry"
             @move="moveBy(row, $event)"
             @remove="editor.removeEntry(row.entry.id)"

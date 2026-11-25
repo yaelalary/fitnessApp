@@ -26,6 +26,7 @@ export interface RoutineItem {
   id: string
   exerciseId: string
   targets: ExerciseTargets
+  notes: string
 }
 
 export interface Routine {
