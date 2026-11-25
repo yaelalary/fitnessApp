@@ -5,7 +5,7 @@ import { METRICS } from '@/domain/metrics'
 import { categoryOf } from '@/domain/categories'
 import { buildProgression, exercisesWithHistory, recentActivity, summarizeProgression, weeklySessionCounts } from '@/domain/stats'
 import { todayIso } from '@/domain/dates'
-import { formatNumber, formatSignedNumber, formatWithUnit } from '@/domain/numbers'
+import { formatNumber, formatSignedPercent, formatWithUnit } from '@/domain/numbers'
 import { useWorkoutStore } from '@/stores/workout'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FormField from '@/components/ui/FormField.vue'
@@ -23,6 +23,7 @@ const RECENT_DAYS = 30
 const workout = useWorkoutStore()
 
 const today = todayIso()
+const activityTitle = `Activité des ${RECENT_DAYS} derniers jours`
 const activity = computed(() => recentActivity(workout.sessions, today, RECENT_DAYS))
 const weeks = computed(() => weeklySessionCounts(workout.sessions, WEEKS_SHOWN, today))
 
@@ -51,7 +52,7 @@ const summaryTiles = computed(() => {
     { label: 'Record', value: formatNumber(summary.value.best), unit },
     {
       label: 'Évolution',
-      value: change === null ? '—' : formatSignedNumber(change),
+      value: change === null ? '—' : formatSignedPercent(change),
       unit: change === null ? '' : '%',
       hint: `depuis ${formatWithUnit(summary.value.first, unit)}`,
     },
@@ -70,12 +71,15 @@ const summaryTiles = computed(() => {
       message="Enregistre quelques séances : tes charges, répétitions et ta régularité apparaîtront ici."
     />
 
-    <template v-else>
+    <div v-else class="stats">
       <section class="stack">
-        <h2 class="section-title">30 derniers jours</h2>
+        <h2 class="section-title">{{ activityTitle }}</h2>
         <ActivityTiles :activity="activity" />
-        <div class="card stack">
-          <h2 class="section-title">Séances par semaine</h2>
+      </section>
+
+      <section class="stack">
+        <h2 class="section-title">Séances par semaine</h2>
+        <div class="card">
           <WeeklyChart :weeks="weeks" />
         </div>
       </section>
@@ -111,6 +115,14 @@ const summaryTiles = computed(() => {
           </template>
         </template>
       </section>
-    </template>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+</style>

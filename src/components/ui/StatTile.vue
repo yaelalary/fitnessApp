@@ -19,7 +19,7 @@ withDefaults(defineProps<{ label: string; value: string; unit?: string; hint?: s
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -27,6 +27,7 @@ withDefaults(defineProps<{ label: string; value: string; unit?: string; hint?: s
 
 .tile__value {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1);
 }

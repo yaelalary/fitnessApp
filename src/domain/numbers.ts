@@ -1,3 +1,5 @@
+const KG_PER_TONNE = 1000
+
 const decimalFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })
 
 export function formatNumber(value: number): string {
@@ -33,4 +35,18 @@ export function countLabel(count: number, singular: string, plural = `${singular
 
 export function formatSignedNumber(value: number): string {
   return value > 0 ? `+${formatNumber(value)}` : formatNumber(value)
+}
+
+export interface FormattedQuantity {
+  value: string
+  unit: string
+}
+
+export function formatMass(kg: number): FormattedQuantity {
+  if (Math.abs(kg) >= KG_PER_TONNE) return { value: formatNumber(roundTo(kg / KG_PER_TONNE, 1)), unit: 't' }
+  return { value: formatNumber(Math.round(kg)), unit: 'kg' }
+}
+
+export function formatSignedPercent(value: number): string {
+  return formatSignedNumber(Math.round(value))
 }
