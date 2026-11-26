@@ -146,6 +146,7 @@ async function remove() {
       <SortableList :items="rows" :item-key="rowKey" @move="editor.moveEntry">
         <template #default="{ item: row }">
           <SessionEntryCard
+            :session-id="id"
             :entry="row.entry"
             :exercise="row.exercise"
             :image-src="row.imageSrc"

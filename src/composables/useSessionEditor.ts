@@ -4,9 +4,11 @@ import { cloneData, findById, moveItem, removeById, upsertById } from '@/domain/
 import { completeAllEntries, createEntry, findLastEntry } from '@/domain/sessions'
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '@/services/sessionDrafts'
 import { useWorkoutStore } from '@/stores/workout'
+import { useRestStore } from '@/stores/rest'
 
 export function useSessionEditor(sessionId: string) {
   const workout = useWorkoutStore()
+  const rest = useRestStore()
   const profileId = workout.activeProfile?.id ?? ''
 
   const saved = computed(() => findById(workout.sessions, sessionId) ?? null)
@@ -59,11 +61,13 @@ export function useSessionEditor(sessionId: string) {
     await workout.saveSession(session.value)
     clearSessionDraft(profileId, sessionId)
     hasUnsavedChanges.value = false
+    rest.stopForSession(sessionId)
   }
 
   function discard() {
     clearSessionDraft(profileId, sessionId)
     hasUnsavedChanges.value = false
+    rest.stopForSession(sessionId)
   }
 
   async function remove() {

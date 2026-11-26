@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import {
-  becameReadyBetween,
   cancelRefill,
   changeRefillDuration,
   refillPhase,
@@ -11,11 +10,9 @@ import {
   type RefillTimer,
 } from '@/domain/refill'
 import { loadRefillTimer, saveRefillTimer } from '@/services/refillStorage'
-import { showNotification, type AppNotification } from '@/services/notifications'
-import { vibrateAlert } from '@/services/haptics'
-import { isPageVisible, onPageVisible } from '@/services/pageVisibility'
-
-const TICK_MS = 1000
+import type { AppNotification } from '@/services/notifications'
+import { announce } from '@/services/alerts'
+import { useDeadlineTicker } from '@/composables/useDeadlineTicker'
 
 export const REFILL_READY_NOTIFICATION: AppNotification = {
   title: 'Gourde',
@@ -25,8 +22,10 @@ export const REFILL_READY_NOTIFICATION: AppNotification = {
 
 export const useRefillStore = defineStore('refill', () => {
   const timer = ref<RefillTimer>(loadRefillTimer())
-  const now = ref(Date.now())
-  let ticker: ReturnType<typeof setInterval> | null = null
+  const { now, refresh } = useDeadlineTicker(
+    () => timer.value.run?.endsAt ?? null,
+    () => announce(REFILL_READY_NOTIFICATION),
+  )
 
   const phase = computed(() => refillPhase(timer.value, now.value))
   const remainingSeconds = computed(() => refillRemainingSeconds(timer.value, now.value))
@@ -34,35 +33,13 @@ export const useRefillStore = defineStore('refill', () => {
   const durationMinutes = computed(() => timer.value.durationMinutes)
   const endsAt = computed(() => timer.value.run?.endsAt ?? null)
 
-  function announceReady() {
-    if (isPageVisible()) vibrateAlert()
-    else void showNotification(REFILL_READY_NOTIFICATION)
-  }
-
-  function syncTicker() {
-    const shouldTick = phase.value === 'running'
-    if (shouldTick && ticker === null) ticker = setInterval(tick, TICK_MS)
-    if (!shouldTick && ticker !== null) {
-      clearInterval(ticker)
-      ticker = null
-    }
-  }
-
-  function tick() {
-    const previous = now.value
-    now.value = Date.now()
-    if (becameReadyBetween(timer.value, previous, now.value)) announceReady()
-    syncTicker()
-  }
-
   function update(next: RefillTimer) {
     timer.value = next
     saveRefillTimer(next)
-    syncTicker()
   }
 
   function start() {
-    now.value = Date.now()
+    refresh()
     update(startRefill(timer.value, now.value))
   }
 
@@ -73,12 +50,6 @@ export const useRefillStore = defineStore('refill', () => {
   function setDuration(minutes: number) {
     update(changeRefillDuration(timer.value, minutes))
   }
-
-  onPageVisible(() => {
-    now.value = Date.now()
-    syncTicker()
-  })
-  syncTicker()
 
   return { phase, remainingSeconds, progress, durationMinutes, endsAt, start, cancel, setDuration }
 })

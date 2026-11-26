@@ -13,6 +13,8 @@ import ProfileChooser from '@/components/profiles/ProfileChooser.vue'
 import ToolsShortcut from '@/components/layout/ToolsShortcut.vue'
 import RefillAlert from '@/components/tools/RefillAlert.vue'
 import { useRefillStore } from '@/stores/refill'
+import { useRestStore } from '@/stores/rest'
+import RestBanner from '@/components/sessions/RestBanner.vue'
 
 type Gate = 'loading' | 'error' | 'choose-profile' | 'content'
 
@@ -21,7 +23,13 @@ const settings = useSettingsStore()
 const workout = useWorkoutStore()
 const creation = useAsyncAction()
 const refill = useRefillStore()
+const rest = useRestStore()
 
+const restBannerSessionId = computed(() => {
+  const sessionId = rest.sessionId
+  if (sessionId === null) return null
+  return route.name === 'session' && route.params.id === sessionId ? null : sessionId
+})
 const showRefillAlert = computed(() => refill.phase === 'ready' && route.name !== 'tools')
 
 const gate = computed<Gate>(() => {
@@ -48,7 +56,16 @@ onMounted(() => workout.load())
   >
     <ToolsShortcut :refill-phase="refill.phase" :refill-remaining-seconds="refill.remainingSeconds" />
   </AppHeader>
-  <RefillAlert v-if="showRefillAlert" @refill="refill.start" @dismiss="refill.cancel" />
+  <div class="banners">
+    <RestBanner
+      v-if="restBannerSessionId"
+      :session-id="restBannerSessionId"
+      :exercise-name="rest.exerciseName"
+      :remaining-seconds="rest.remainingSeconds"
+      @stop="rest.stop"
+    />
+    <RefillAlert v-if="showRefillAlert" @refill="refill.start" @dismiss="refill.cancel" />
+  </div>
   <main>
     <div v-if="gate === 'loading'" class="page">
       <LoadingState label="Chargement de tes séances…" />
@@ -72,3 +89,11 @@ onMounted(() => workout.load())
   </main>
   <AppNav />
 </template>
+
+<style scoped>
+.banners {
+  position: sticky;
+  top: var(--header-height);
+  z-index: var(--z-sticky);
+}
+</style>

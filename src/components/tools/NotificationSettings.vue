@@ -11,7 +11,7 @@ const emit = defineEmits<{ request: []; test: [] }>()
 const MESSAGES: Record<NotificationAccess, string> = {
   unsupported:
     'Ce navigateur ne permet pas les notifications ici. Sur iPhone, ajoute d’abord l’app à l’écran d’accueil (Partager → Sur l’écran d’accueil), puis ouvre-la depuis son icône.',
-  default: 'Active-les pour être prévenu sur le téléphone quand la gourde peut être remplie.',
+  default: 'Active-les pour être prévenu sur le téléphone quand la gourde peut être remplie ou que ta récup est finie.',
   granted: 'Activées sur cet appareil.',
   denied: 'Bloquées pour cette page. Autorise-les dans les réglages du navigateur, puis recharge l’app.',
 }

@@ -14,6 +14,7 @@ import IntervalsEditor from './IntervalsEditor.vue'
 import SetRow from './SetRow.vue'
 
 const props = defineProps<{
+  sessionId: string
   entry: SessionEntry
   exercise: Exercise
   imageSrc: string | null
@@ -60,7 +61,13 @@ function patchSet(index: number, changes: Partial<SetLog>) {
       </ol>
       <div class="cluster">
         <AppButton size="sm" icon="plus" @click="emit('update', addSet(entry))">{{ addSetLabel }}</AppButton>
-        <RestTimer v-if="config.usesRest" :seconds="entry.restSeconds" />
+        <RestTimer
+          v-if="config.usesRest"
+          :seconds="entry.restSeconds"
+          :session-id="sessionId"
+          :entry-id="entry.id"
+          :exercise-name="exercise.name"
+        />
       </div>
     </template>
 
