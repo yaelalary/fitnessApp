@@ -13,13 +13,12 @@ import { useLeaveGuard } from '@/composables/useLeaveGuard'
 import { useConfirm } from '@/composables/useConfirm'
 import { useExerciseDefaultsUpdate } from '@/composables/useExerciseDefaultsUpdate'
 import AppButton from '@/components/ui/AppButton.vue'
-import AppDialog from '@/components/ui/AppDialog.vue'
 import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
-import ExercisePicker from '@/components/exercises/ExercisePicker.vue'
+import AddExerciseDialog from '@/components/exercises/AddExerciseDialog.vue'
 import RoutineItemRow from '@/components/routines/RoutineItemRow.vue'
 import SortableList from '@/components/ui/SortableList.vue'
 import UnsavedChangesDialog from '@/components/ui/UnsavedChangesDialog.vue'
@@ -163,9 +162,13 @@ async function remove() {
       </div>
     </form>
 
-    <AppDialog :open="pickerOpen" title="Ajouter un exercice" @close="pickerOpen = false">
-      <ExercisePicker :exercises="workout.exercises" :images="workout.images" @pick="addExercise" />
-    </AppDialog>
+    <AddExerciseDialog
+      :open="pickerOpen"
+      :exercises="workout.exercises"
+      :images="workout.images"
+      @pick="addExercise"
+      @close="pickerOpen = false"
+    />
 
     <UnsavedChangesDialog
       :open="leaveGuard.open.value"

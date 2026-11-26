@@ -9,7 +9,7 @@ import ExerciseFilters from './ExerciseFilters.vue'
 import ExerciseSummary from './ExerciseSummary.vue'
 
 const props = defineProps<{ exercises: Exercise[]; images: ImageStore }>()
-defineEmits<{ pick: [exercise: Exercise] }>()
+const emit = defineEmits<{ pick: [exercise: Exercise]; create: [name: string] }>()
 
 const category = ref<CategoryId | null>(null)
 const query = ref('')
@@ -21,18 +21,22 @@ const rows = computed(() =>
     detail: describeTargets(exercise.defaults, exercise.category),
   })),
 )
+const createLabel = computed(() => (query.value.trim() ? `Créer « ${query.value.trim()} »` : 'Nouvel exercice'))
+
+function create() {
+  emit('create', query.value.trim())
+}
 </script>
 
 <template>
   <div class="stack">
     <ExerciseFilters v-model:category="category" v-model:query="query" />
-    <EmptyState v-if="exercises.length === 0" title="Aucun exercice" message="Crée d’abord tes exercices dans l’onglet Exercices.">
-      <AppButton :to="{ name: 'exercise-new' }" variant="primary" icon="plus">Nouvel exercice</AppButton>
-    </EmptyState>
+    <AppButton icon="plus" block @click="create">{{ createLabel }}</AppButton>
+    <EmptyState v-if="exercises.length === 0" title="Aucun exercice" message="Crée ton premier exercice avec le bouton ci-dessus." />
     <p v-else-if="rows.length === 0" class="muted">Aucun exercice ne correspond.</p>
     <ul v-else class="stack">
       <li v-for="row in rows" :key="row.exercise.id">
-        <button type="button" class="pick" @click="$emit('pick', row.exercise)">
+        <button type="button" class="pick" @click="emit('pick', row.exercise)">
           <ExerciseSummary :exercise="row.exercise" :image-src="row.imageSrc" :detail="row.detail" />
         </button>
       </li>

@@ -21,7 +21,7 @@ watch(
 </script>
 
 <template>
-  <dialog ref="dialog" class="dialog" :class="{ 'dialog--fullscreen': fullscreen }" :aria-label="title" @close="emit('close')">
+  <dialog ref="dialog" class="dialog" :class="{ 'dialog--fullscreen': fullscreen }" :aria-label="title" @cancel.prevent="emit('close')" @close="emit('close')">
     <header class="dialog__header">
       <h2 class="section-title">{{ title }}</h2>
       <AppButton variant="ghost" icon="close" icon-only label="Fermer" @click="emit('close')" />

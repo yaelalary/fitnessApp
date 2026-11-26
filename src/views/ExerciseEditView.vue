@@ -36,7 +36,7 @@ const imageSrc = computed(() => resolveImageSrc(existing?.image ?? null, workout
 const title = computed(() => (isNew ? 'Nouvel exercice' : (existing?.name ?? 'Exercice')))
 
 async function persist(): Promise<boolean> {
-  return (await run(() => editor.save())) === true
+  return Boolean(await run(() => editor.save()))
 }
 
 const leaveGuard = useLeaveGuard({ isDirty: () => editor.isDirty.value, save: persist })

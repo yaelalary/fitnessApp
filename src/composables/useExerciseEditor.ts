@@ -15,11 +15,10 @@ export function useExerciseEditor(initial: Exercise) {
 
   const isDirty = computed(() => !isSameData(draft.value, baseline) || image.value.kind !== 'keep')
 
-  async function save(): Promise<boolean> {
+  async function save(): Promise<Exercise | null> {
     errors.value = validateExercise(draft.value)
-    if (hasErrors(errors.value)) return false
-    await workout.saveExercise(draft.value, image.value)
-    return true
+    if (hasErrors(errors.value)) return null
+    return workout.saveExercise(draft.value, image.value)
   }
 
   return { draft, image, errors, isDirty, save }
