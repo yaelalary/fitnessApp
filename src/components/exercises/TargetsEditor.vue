@@ -18,6 +18,7 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:targets': [value: ExerciseTargets] }>()
 
 const config = computed(() => categoryOf(props.category))
+const minReps = computed(() => (config.value.repsOptional ? 0 : 1))
 const setsLabel = computed(() => setNounTitle(config.value.setNoun, true))
 
 function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[K]) {
@@ -45,7 +46,7 @@ function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[
         :described-by="field.describedBy"
         :invalid="field.invalid"
         :label="config.repsLabel"
-        :min="1"
+        :min="minReps"
         :max="600"
         :model-value="targets.reps"
         @update:model-value="update('reps', $event)"

@@ -12,6 +12,7 @@ export interface CategoryConfig {
   setNoun: SetNoun
   repsLabel: string
   repsUnit: string
+  repsOptional: boolean
   usesWeight: boolean
   usesRest: boolean
   usesDistance: boolean
@@ -30,13 +31,14 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
+    repsOptional: false,
     usesWeight: false,
     usesRest: false,
     usesDistance: false,
     usesMachine: true,
     usesSettings: true,
     metrics: ['duration'],
-    defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 10 },
+    defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 0 },
   },
   strength: {
     id: 'strength',
@@ -46,6 +48,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
+    repsOptional: false,
     usesWeight: true,
     usesRest: true,
     usesDistance: false,
@@ -62,6 +65,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
+    repsOptional: false,
     usesWeight: false,
     usesRest: false,
     usesDistance: true,
@@ -78,6 +82,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     setNoun: HOLDS,
     repsLabel: 'Durée (s)',
     repsUnit: 's',
+    repsOptional: true,
     usesWeight: false,
     usesRest: true,
     usesDistance: false,
@@ -95,6 +100,10 @@ export const CATEGORY_ORDER: CategoryId[] = ['warmup', 'strength', 'cardio', 'st
 
 export function categoryOf(id: CategoryId): CategoryConfig {
   return CATEGORIES[id]
+}
+
+export function formatReps(config: CategoryConfig, reps: number): string {
+  return config.repsUnit === 's' ? `${reps} s` : String(reps)
 }
 
 export function isCategoryId(value: unknown): value is CategoryId {

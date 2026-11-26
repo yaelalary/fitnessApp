@@ -1,5 +1,5 @@
 import type { BrandId, CategoryId, Exercise, ExerciseTargets } from './types'
-import { CATEGORIES, categoryOf } from './categories'
+import { CATEGORIES, categoryOf, formatReps } from './categories'
 import { BRANDS, findMachine, type CatalogEntry } from './machines'
 import { createId } from './ids'
 import { describeMuscles } from './muscles'
@@ -52,7 +52,7 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
   }
   if (config.tracking === 'sets') {
     errors.sets = exercise.defaults.sets < 1 ? config.setNoun.atLeastOne : undefined
-    errors.reps = exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
+    errors.reps = !config.repsOptional && exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
     errors.weightKg = nonNegative(exercise.defaults.weightKg, 'La charge ne peut pas être négative.')
     errors.restSeconds = nonNegative(exercise.defaults.restSeconds, 'La récupération ne peut pas être négative.')
   } else {
@@ -68,7 +68,8 @@ export function describeTargets(targets: ExerciseTargets, category: CategoryId):
     const duration = formatDuration(targets.durationMinutes) || 'Durée libre'
     return steps > 1 ? `${duration} · ${countLabel(steps, 'palier')}` : duration
   }
-  const parts = [`${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`]
+  const count = targets.reps > 0 ? `${targets.sets} × ${formatReps(config, targets.reps)}` : countLabel(targets.sets, config.setNoun.singular, config.setNoun.plural)
+  const parts = [count]
   if (config.usesWeight && targets.weightKg > 0) parts.push(`${formatNumber(targets.weightKg)} kg`)
   if (config.usesRest && targets.restSeconds > 0) parts.push(`récup ${formatRest(targets.restSeconds)}`)
   return parts.join(' · ')

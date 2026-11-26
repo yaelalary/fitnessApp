@@ -3,7 +3,7 @@ import type { PerformanceSample } from './metrics'
 import { METRICS } from './metrics'
 import { createId } from './ids'
 import { formatDuration, todayIso } from './dates'
-import { categoryOf, type TrackingMode } from './categories'
+import { categoryOf, formatReps, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
 import { SERIES } from './setNouns'
 import { settingsUsedIn, startingIntervals, totalDuration } from './intervals'
@@ -172,13 +172,15 @@ export function describePerformance(entry: SessionEntry): string {
     if (entry.intervals.length > 1) parts.push(countLabel(entry.intervals.length, 'palier'))
     return parts.filter(Boolean).join(' · ')
   }
-  const unit = config.repsUnit === 's' ? ' s' : ''
-  return entry.sets
+  const described = entry.sets
     .filter((set) => set.reps > 0)
     .map((set) =>
-      config.usesWeight && set.weightKg > 0 ? `${set.reps} × ${formatNumber(set.weightKg)} kg` : `${set.reps}${unit}`,
+      config.usesWeight && set.weightKg > 0 ? `${set.reps} × ${formatNumber(set.weightKg)} kg` : formatReps(config, set.reps),
     )
-    .join(', ')
+  if (described.length === 0 && config.repsOptional && entry.sets.length > 0) {
+    return countLabel(entry.sets.length, config.setNoun.singular, config.setNoun.plural)
+  }
+  return described.join(', ')
 }
 
 export function describeSessionSummary(summary: SessionSummary): string {
