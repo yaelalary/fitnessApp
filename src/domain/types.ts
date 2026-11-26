@@ -11,6 +11,12 @@ export interface ExerciseTargets {
   restSeconds: number
   durationMinutes: number
   intervals?: Interval[]
+  setTargets?: SetTarget[]
+}
+
+export interface SetTarget {
+  reps: number
+  weightKg: number
 }
 
 export interface Exercise {

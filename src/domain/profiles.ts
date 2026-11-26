@@ -14,6 +14,7 @@ import { isBrandId } from './machines'
 import { categoryOf, isCategoryId } from './categories'
 import { normalizeCardioSettings } from './cardioSettings'
 import { createInterval, normalizeInterval, totalDuration, withTargetIntervals } from './intervals'
+import { normalizeSetTarget, withTargetSets } from './setTargets'
 import { createId } from './ids'
 import { describeMuscles, normalizeMuscles } from './muscles'
 import { toSafeNumber } from './numbers'
@@ -43,7 +44,9 @@ function normalizeTargets(value: unknown): ExerciseTargets {
     durationMinutes: toSafeNumber(raw.durationMinutes),
   }
   const intervals = asArray(raw.intervals).map(normalizeInterval)
-  return intervals.length > 0 ? withTargetIntervals(targets, intervals) : targets
+  const sets = asArray(raw.setTargets).map(normalizeSetTarget)
+  const withSets = sets.length > 0 ? withTargetSets(targets, sets) : targets
+  return intervals.length > 0 ? withTargetIntervals(withSets, intervals) : withSets
 }
 
 function normalizeExercise(value: unknown): Exercise {

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { toggleValue } from '@/domain/collections'
 import AppButton from './AppButton.vue'
 import AppDialog from './AppDialog.vue'
+import CheckboxField from './CheckboxField.vue'
 
 export interface MultiSelectOption {
   value: string
@@ -46,10 +47,13 @@ function toggle(value: string) {
     <div class="stack-lg">
       <fieldset v-for="group in groups" :key="group.label" class="multi-select__group">
         <legend class="eyebrow">{{ group.label }}</legend>
-        <label v-for="option in group.options" :key="option.value" class="multi-select__option">
-          <input type="checkbox" :checked="selected.has(option.value)" @change="toggle(option.value)" />
-          <span>{{ option.label }}</span>
-        </label>
+        <CheckboxField
+          v-for="option in group.options"
+          :key="option.value"
+          :label="option.label"
+          :model-value="selected.has(option.value)"
+          @update:model-value="toggle(option.value)"
+        />
       </fieldset>
       <AppButton variant="primary" icon="check" block @click="open = false">Valider</AppButton>
     </div>
@@ -72,13 +76,5 @@ function toggle(value: string) {
   margin: 0;
   padding: 0;
   border: none;
-}
-
-.multi-select__option {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: var(--tap-size);
-  cursor: pointer;
 }
 </style>

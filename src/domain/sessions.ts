@@ -6,6 +6,7 @@ import { formatDuration, todayIso } from './dates'
 import { categoryOf, formatReps, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
 import { SERIES } from './setNouns'
+import { targetSets } from './setTargets'
 import { settingsUsedIn, startingIntervals, totalDuration } from './intervals'
 
 export function sortSessionsDesc(sessions: readonly Session[]): Session[] {
@@ -26,7 +27,7 @@ export function findLastEntry(
 }
 
 function setsFromTargets(targets: ExerciseTargets): SetLog[] {
-  return Array.from({ length: targets.sets }, () => ({ reps: targets.reps, weightKg: targets.weightKg, done: false }))
+  return targetSets(targets).map((set) => ({ reps: set.reps, weightKg: set.weightKg, done: false }))
 }
 
 function setsFromPrevious(previous: SessionEntry, targets: ExerciseTargets): SetLog[] {

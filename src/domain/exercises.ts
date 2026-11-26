@@ -1,5 +1,6 @@
-import type { BrandId, CategoryId, Exercise, ExerciseTargets } from './types'
-import { CATEGORIES, categoryOf, formatReps } from './categories'
+import type { BrandId, CategoryId, Exercise, ExerciseTargets, SetTarget } from './types'
+import { CATEGORIES, categoryOf, formatReps, type CategoryConfig } from './categories'
+import { hasIdenticalSets, targetSets } from './setTargets'
 import { BRANDS, findMachine, type CatalogEntry } from './machines'
 import { createId } from './ids'
 import { describeMuscles } from './muscles'
@@ -51,9 +52,10 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
     name: requiredText(exercise.name, "Donne un nom à l'exercice."),
   }
   if (config.tracking === 'sets') {
-    errors.sets = exercise.defaults.sets < 1 ? config.setNoun.atLeastOne : undefined
-    errors.reps = !config.repsOptional && exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
-    errors.weightKg = nonNegative(exercise.defaults.weightKg, 'La charge ne peut pas être négative.')
+    const sets = targetSets(exercise.defaults)
+    errors.sets = sets.length < 1 ? config.setNoun.atLeastOne : undefined
+    errors.reps = !config.repsOptional && sets.some((set) => set.reps < 1) ? 'Au moins une répétition.' : undefined
+    errors.weightKg = sets.some((set) => set.weightKg < 0) ? 'La charge ne peut pas être négative.' : undefined
     errors.restSeconds = nonNegative(exercise.defaults.restSeconds, 'La récupération ne peut pas être négative.')
   } else {
     errors.durationMinutes = nonNegative(exercise.defaults.durationMinutes, 'La durée ne peut pas être négative.')
@@ -68,11 +70,25 @@ export function describeTargets(targets: ExerciseTargets, category: CategoryId):
     const duration = formatDuration(targets.durationMinutes) || 'Durée libre'
     return steps > 1 ? `${duration} · ${countLabel(steps, 'palier')}` : duration
   }
-  const count = targets.reps > 0 ? `${targets.sets} × ${formatReps(config, targets.reps)}` : countLabel(targets.sets, config.setNoun.singular, config.setNoun.plural)
-  const parts = [count]
-  if (config.usesWeight && targets.weightKg > 0) parts.push(`${formatNumber(targets.weightKg)} kg`)
+  const parts = [describeTargetSets(targetSets(targets), config)]
   if (config.usesRest && targets.restSeconds > 0) parts.push(`récup ${formatRest(targets.restSeconds)}`)
   return parts.join(' · ')
+}
+
+function describeSet(set: SetTarget, config: CategoryConfig): string {
+  const reps = set.reps > 0 ? formatReps(config, set.reps) : ''
+  if (!config.usesWeight || set.weightKg <= 0) return reps
+  return reps ? `${reps} × ${formatNumber(set.weightKg)} kg` : `${formatNumber(set.weightKg)} kg`
+}
+
+function describeTargetSets(sets: readonly SetTarget[], config: CategoryConfig): string {
+  const noun = countLabel(sets.length, config.setNoun.singular, config.setNoun.plural)
+  if (sets.length === 0) return noun
+  if (!hasIdenticalSets(sets)) return sets.map((set) => describeSet(set, config)).join(', ')
+  const [first] = sets
+  if (first.reps <= 0) return [noun, config.usesWeight && first.weightKg > 0 ? `${formatNumber(first.weightKg)} kg` : ''].filter(Boolean).join(' · ')
+  const count = `${sets.length} × ${formatReps(config, first.reps)}`
+  return config.usesWeight && first.weightKg > 0 ? `${count} · ${formatNumber(first.weightKg)} kg` : count
 }
 
 export function describeEquipment(exercise: Exercise): string {
