@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Exercise, FileChanges, ImageStore, Profile, Routine, Session, WorkoutSnapshot } from '@/domain/types'
+import type { Exercise, ExerciseTargets, FileChanges, ImageStore, Profile, Routine, Session, WorkoutSnapshot } from '@/domain/types'
+import { applyTargetsToExercise } from '@/domain/exerciseDefaults'
 import { findById, indexById, removeById, upsertById } from '@/domain/collections'
 import { sortExercises } from '@/domain/exercises'
 import { removeExerciseFromRoutines } from '@/domain/routines'
@@ -93,6 +94,13 @@ export const useWorkoutStore = defineStore('workout', () => {
     return saved
   }
 
+  async function updateExerciseDefaults(exerciseId: string, targets: ExerciseTargets) {
+    const exercise = findById(requireActiveProfile().exercises, exerciseId)
+    if (!exercise) throw new Error('Cet exercice n’existe plus.')
+    const updated = applyTargetsToExercise(exercise, targets)
+    await updateActiveProfile((profile) => ({ ...profile, exercises: upsertById(profile.exercises, updated) }))
+  }
+
   async function deleteExercise(exerciseId: string) {
     const exercise = findById(requireActiveProfile().exercises, exerciseId)
     await updateActiveProfile(
@@ -181,6 +189,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     storageKind,
     load,
     saveExercise,
+    updateExerciseDefaults,
     deleteExercise,
     saveRoutine,
     deleteRoutine,

@@ -8,6 +8,8 @@ import AppButton from '@/components/ui/AppButton.vue'
 import DragHandle from '@/components/ui/DragHandle.vue'
 import NoteField from '@/components/ui/NoteField.vue'
 import RemoveItemButton from '@/components/ui/RemoveItemButton.vue'
+import ErrorMessage from '@/components/ui/ErrorMessage.vue'
+import ApplyToExerciseButton, { type ExerciseUpdateProps } from '@/components/exercises/ApplyToExerciseButton.vue'
 import ExerciseSummary from '@/components/exercises/ExerciseSummary.vue'
 import RestTimer from './RestTimer.vue'
 import IntervalsEditor from './IntervalsEditor.vue'
@@ -20,9 +22,10 @@ const props = defineProps<{
   imageSrc: string | null
   previous: SessionEntry | null
   routineNote?: string
+  exerciseUpdate?: ExerciseUpdateProps | null
 }>()
 
-const emit = defineEmits<{ update: [entry: SessionEntry]; move: [offset: -1 | 1]; remove: [] }>()
+const emit = defineEmits<{ update: [entry: SessionEntry]; move: [offset: -1 | 1]; remove: []; 'apply-to-exercise': [] }>()
 
 const config = computed(() => categoryOf(props.entry.category))
 const addSetLabel = computed(() => setNounTitle(config.value.setNoun))
@@ -75,7 +78,15 @@ function patchSet(index: number, changes: Partial<SetLog>) {
 
     <NoteField :model-value="entry.notes" @update:model-value="patch({ notes: $event })" />
 
-    <RemoveItemButton @remove="emit('remove')" />
+    <ErrorMessage v-if="exerciseUpdate?.error" :message="exerciseUpdate.error" />
+    <RemoveItemButton @remove="emit('remove')">
+      <ApplyToExerciseButton
+        v-if="exerciseUpdate"
+        :up-to-date="exerciseUpdate.upToDate"
+        :busy="exerciseUpdate.busy"
+        @apply="emit('apply-to-exercise')"
+      />
+    </RemoveItemButton>
   </article>
 </template>
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Exercise } from '@/domain/types'
+import type { Exercise, SessionEntry } from '@/domain/types'
+import { hasSameTargets, targetsFromEntry } from '@/domain/exerciseDefaults'
 import { exerciseFromEntry, hasPendingEntries } from '@/domain/sessions'
 import { routineItemNote } from '@/domain/routines'
 import { findById } from '@/domain/collections'
@@ -11,6 +12,7 @@ import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useSessionEditor } from '@/composables/useSessionEditor'
 import { useConfirm } from '@/composables/useConfirm'
+import { useExerciseDefaultsUpdate } from '@/composables/useExerciseDefaultsUpdate'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDialog from '@/components/ui/AppDialog.vue'
 import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
@@ -31,11 +33,24 @@ const { session, saved, hasUnsavedChanges } = editor
 const { busy, error, run } = useAsyncAction()
 const pickerOpen = ref(false)
 const confirm = useConfirm()
+const exerciseDefaults = useExerciseDefaultsUpdate()
 
 const routine = computed(() => {
   const routineId = session.value?.routineId
   return routineId ? (findById(workout.routines, routineId) ?? null) : null
 })
+function exerciseUpdateFor(entry: SessionEntry) {
+  const exercise = workout.exercisesById.get(entry.exerciseId)
+  if (!exercise) return null
+  const upToDate = hasSameTargets(exercise, targetsFromEntry(entry, exercise.defaults))
+  return { upToDate, ...exerciseDefaults.stateOf(entry.id) }
+}
+
+function applyToExercise(entry: SessionEntry) {
+  const exercise = workout.exercisesById.get(entry.exerciseId)
+  if (exercise) void exerciseDefaults.apply(entry.id, exercise.id, targetsFromEntry(entry, exercise.defaults))
+}
+
 const subtitle = computed(() => (session.value ? formatLongDate(session.value.date) : ''))
 const rows = computed(() =>
   (session.value?.entries ?? []).map((entry, index) => {
@@ -47,6 +62,7 @@ const rows = computed(() =>
       imageSrc: exerciseImageSrc(exercise, workout.images),
       previous: editor.previousEntryFor(entry.exerciseId),
       routineNote: routineItemNote(routine.value, entry.exerciseId),
+      exerciseUpdate: exerciseUpdateFor(entry),
     }
   }),
 )
@@ -152,9 +168,11 @@ async function remove() {
             :image-src="row.imageSrc"
             :previous="row.previous"
             :routine-note="row.routineNote"
+            :exercise-update="row.exerciseUpdate"
             @update="editor.updateEntry"
             @move="moveBy(row, $event)"
             @remove="editor.removeEntry(row.entry.id)"
+            @apply-to-exercise="applyToExercise(row.entry)"
           />
         </template>
       </SortableList>

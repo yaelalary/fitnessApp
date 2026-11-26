@@ -5,11 +5,13 @@ import type { Exercise, Routine, RoutineItem } from '@/domain/types'
 import { createRoutine, createRoutineItem, validateRoutine, type RoutineField } from '@/domain/routines'
 import { cloneData, findById, isSameData, moveItem, removeById } from '@/domain/collections'
 import { exerciseImageSrc } from '@/domain/images'
+import { hasSameTargets } from '@/domain/exerciseDefaults'
 import { hasErrors, type ValidationErrors } from '@/domain/validation'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLeaveGuard } from '@/composables/useLeaveGuard'
 import { useConfirm } from '@/composables/useConfirm'
+import { useExerciseDefaultsUpdate } from '@/composables/useExerciseDefaultsUpdate'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppDialog from '@/components/ui/AppDialog.vue'
 import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
@@ -35,13 +37,15 @@ const baseline = cloneData(draft.value)
 const errors = ref<ValidationErrors<RoutineField>>({})
 const pickerOpen = ref(false)
 const confirm = useConfirm()
+const exerciseDefaults = useExerciseDefaultsUpdate()
 
 const title = computed(() => (existing ? existing.name : 'Nouveau parcours'))
 const rows = computed(() =>
   draft.value.items.flatMap((item, index) => {
     const exercise = workout.exercisesById.get(item.exerciseId)
     if (!exercise) return []
-    return [{ item, index, exercise, imageSrc: exerciseImageSrc(exercise, workout.images) }]
+    const exerciseUpdate = { upToDate: hasSameTargets(exercise, item.targets), ...exerciseDefaults.stateOf(item.id) }
+    return [{ item, index, exercise, imageSrc: exerciseImageSrc(exercise, workout.images), exerciseUpdate }]
   }),
 )
 
@@ -134,10 +138,12 @@ async function remove() {
               :exercise="row.exercise"
               :image-src="row.imageSrc"
               :index="index"
+              :exercise-update="row.exerciseUpdate"
               @update:targets="updateItem(row.item.id, { targets: $event })"
               @update:notes="updateItem(row.item.id, { notes: $event })"
               @move="moveBy(row, $event)"
               @remove="removeItem(row.item.id)"
+              @apply-to-exercise="exerciseDefaults.apply(row.item.id, row.exercise.id, row.item.targets)"
             />
           </template>
         </SortableList>
