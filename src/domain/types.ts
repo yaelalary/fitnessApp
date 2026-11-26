@@ -1,3 +1,5 @@
+import type { CardioSettingId } from './cardioSettings'
+
 export type CategoryId = 'warmup' | 'strength' | 'cardio' | 'stretching'
 
 export type BrandId = 'technogym' | 'hammer-strength' | 'free-weights' | 'other'
@@ -8,6 +10,7 @@ export interface ExerciseTargets {
   weightKg: number
   restSeconds: number
   durationMinutes: number
+  intervals?: Interval[]
 }
 
 export interface Exercise {
@@ -17,6 +20,7 @@ export interface Exercise {
   brand: BrandId | null
   machine: string
   muscles: string[]
+  settings: CardioSettingId[]
   notes: string
   image: string | null
   defaults: ExerciseTargets
@@ -42,6 +46,14 @@ export interface SetLog {
   done: boolean
 }
 
+export type IntervalValues = Partial<Record<CardioSettingId, number>>
+
+export interface Interval {
+  durationMinutes: number
+  values: IntervalValues
+  done: boolean
+}
+
 export interface SessionEntry {
   id: string
   exerciseId: string
@@ -49,10 +61,10 @@ export interface SessionEntry {
   category: CategoryId
   restSeconds: number
   sets: SetLog[]
+  intervals: Interval[]
   durationMinutes: number
   distanceKm: number
   notes: string
-  done: boolean
 }
 
 export interface Session {

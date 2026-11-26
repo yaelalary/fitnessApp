@@ -41,10 +41,10 @@ const history: Session[] = [
           { reps: 10, weightKg: 40, done: true },
           { reps: 8, weightKg: 45, done: true },
         ],
+        intervals: [],
         durationMinutes: 0,
         distanceKm: 0,
         notes: '',
-        done: false,
       },
     ],
   },
@@ -129,12 +129,12 @@ describe('tout cocher', () => {
     const cardio = session.entries[0]
     expect(isEntryComplete(cardio)).toBe(false)
     expect(hasPendingEntries({ ...session, entries: [cardio] })).toBe(true)
-    expect(isEntryComplete({ ...cardio, done: true })).toBe(true)
+    expect(isEntryComplete({ ...cardio, intervals: cardio.intervals.map((interval) => ({ ...interval, done: true })) })).toBe(true)
   })
 
   it('coche aussi le cardio', () => {
     const completed = completeAllEntries(session)
-    expect(completed.entries[0].done).toBe(true)
+    expect(completed.entries[0].intervals.every((interval) => interval.done)).toBe(true)
     expect(isEntryComplete(completed.entries[0])).toBe(true)
   })
 

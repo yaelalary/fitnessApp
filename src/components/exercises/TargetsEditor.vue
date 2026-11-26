@@ -3,14 +3,15 @@ import { computed } from 'vue'
 import type { CategoryId, ExerciseTargets } from '@/domain/types'
 import type { ExerciseField } from '@/domain/exercises'
 import type { ValidationErrors } from '@/domain/validation'
+import type { CardioSettingId } from '@/domain/cardioSettings'
 import { categoryOf, REST_STEP_SECONDS, WEIGHT_STEP_KG } from '@/domain/categories'
 import FormField from '@/components/ui/FormField.vue'
-import DurationInput from '@/components/ui/DurationInput.vue'
+import TargetIntervalsEditor from './TargetIntervalsEditor.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
 
 const props = withDefaults(
-  defineProps<{ targets: ExerciseTargets; category: CategoryId; errors?: ValidationErrors<ExerciseField> }>(),
-  { errors: () => ({}) },
+  defineProps<{ targets: ExerciseTargets; category: CategoryId; settings?: CardioSettingId[]; errors?: ValidationErrors<ExerciseField> }>(),
+  { errors: () => ({}), settings: () => [] },
 )
 
 const emit = defineEmits<{ 'update:targets': [value: ExerciseTargets] }>()
@@ -75,12 +76,5 @@ function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[
       />
     </FormField>
   </div>
-  <FormField v-else v-slot="field" label="Durée" :error="errors.durationMinutes">
-    <DurationInput
-      :id="field.id"
-      label="la durée"
-      :model-value="targets.durationMinutes"
-      @update:model-value="update('durationMinutes', $event)"
-    />
-  </FormField>
+  <TargetIntervalsEditor v-else :targets="targets" :settings="settings" @update:targets="emit('update:targets', $event)" />
 </template>

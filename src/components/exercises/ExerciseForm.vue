@@ -5,7 +5,8 @@ import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
 import { BRANDS, BRAND_ORDER, machineImageUrl, type CatalogEntry } from '@/domain/machines'
 import { muscleOptionGroups } from '@/domain/muscles'
-import { changeExerciseBrand, changeExerciseCategory, selectCatalogMachine, type ExerciseField } from '@/domain/exercises'
+import { cardioSettingOptions, normalizeCardioSettings, type CardioSettingId } from '@/domain/cardioSettings'
+import { changeExerciseBrand, changeExerciseCategory, changeExerciseSettings, selectCatalogMachine, type ExerciseField } from '@/domain/exercises'
 import type { ValidationErrors } from '@/domain/validation'
 import AppButton from '@/components/ui/AppButton.vue'
 import MultiSelect from '@/components/ui/MultiSelect.vue'
@@ -33,6 +34,7 @@ const emit = defineEmits<{ 'update:draft': [draft: Exercise]; 'update:image': [i
 const categoryOptions: SegmentOption<CategoryId>[] = CATEGORY_ORDER.map((id) => ({ value: id, label: CATEGORIES[id].label }))
 const config = computed(() => categoryOf(props.draft.category))
 const muscleGroups = computed(() => muscleOptionGroups(props.draft.muscles))
+const settingGroups = [{ label: 'Réglages de la machine', options: cardioSettingOptions() }]
 const catalogImageSrc = computed(() =>
   config.value.usesMachine ? machineImageUrl(props.draft.brand, props.draft.machine) : null,
 )
@@ -52,6 +54,10 @@ function draftField<K extends 'name' | 'machine' | 'muscles' | 'defaults' | 'not
 const name = draftField('name')
 const machine = draftField('machine')
 const muscles = draftField('muscles')
+const settings = computed<CardioSettingId[]>({
+  get: () => props.draft.settings,
+  set: (value) => replaceDraft(changeExerciseSettings(props.draft, normalizeCardioSettings(value))),
+})
 const defaults = draftField('defaults')
 const notes = draftField('notes')
 const image = computed<ImageInput>({
@@ -112,9 +118,20 @@ function pickMachine(entry: CatalogEntry) {
       />
     </FormField>
 
+    <FormField v-if="config.usesSettings" v-slot="field" label="Réglages à noter" hint="Vitesse, pente… à renseigner pour chaque palier pendant la séance.">
+      <MultiSelect
+        :id="field.id"
+        v-model="settings"
+        :groups="settingGroups"
+        title="Réglages à noter"
+        placeholder="Aucun réglage"
+        :aria-describedby="field.describedBy"
+      />
+    </FormField>
+
     <section class="stack">
       <h2 class="section-title">Objectif par défaut</h2>
-      <TargetsEditor v-model:targets="defaults" :category="draft.category" :errors="errors" />
+      <TargetsEditor v-model:targets="defaults" :category="draft.category" :settings="draft.settings" :errors="errors" />
     </section>
 
     <section class="stack">

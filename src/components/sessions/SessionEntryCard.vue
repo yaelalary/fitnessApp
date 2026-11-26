@@ -9,7 +9,7 @@ import NoteField from '@/components/ui/NoteField.vue'
 import RemoveItemButton from '@/components/ui/RemoveItemButton.vue'
 import ExerciseSummary from '@/components/exercises/ExerciseSummary.vue'
 import RestTimer from './RestTimer.vue'
-import DurationRow from './DurationRow.vue'
+import IntervalsEditor from './IntervalsEditor.vue'
 import SetRow from './SetRow.vue'
 
 const props = defineProps<{
@@ -62,7 +62,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
       </div>
     </template>
 
-    <DurationRow v-else :entry="entry" :config="config" @update="patch" />
+    <IntervalsEditor v-else :entry="entry" :config="config" @update="emit('update', $event)" />
 
     <NoteField :model-value="entry.notes" @update:model-value="patch({ notes: $event })" />
 

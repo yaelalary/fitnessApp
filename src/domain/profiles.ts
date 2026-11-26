@@ -1,6 +1,8 @@
 import type {
+  CategoryId,
   Exercise,
   ExerciseTargets,
+  Interval,
   Profile,
   Routine,
   RoutineItem,
@@ -9,7 +11,9 @@ import type {
   SetLog,
 } from './types'
 import { isBrandId } from './machines'
-import { isCategoryId } from './categories'
+import { categoryOf, isCategoryId } from './categories'
+import { normalizeCardioSettings } from './cardioSettings'
+import { createInterval, normalizeInterval, totalDuration, withTargetIntervals } from './intervals'
 import { createId } from './ids'
 import { describeMuscles, normalizeMuscles } from './muscles'
 import { toSafeNumber } from './numbers'
@@ -31,13 +35,15 @@ function asArray(value: unknown): unknown[] {
 
 function normalizeTargets(value: unknown): ExerciseTargets {
   const raw = asRecord(value)
-  return {
+  const targets: ExerciseTargets = {
     sets: toSafeNumber(raw.sets),
     reps: toSafeNumber(raw.reps),
     weightKg: toSafeNumber(raw.weightKg),
     restSeconds: toSafeNumber(raw.restSeconds),
     durationMinutes: toSafeNumber(raw.durationMinutes),
   }
+  const intervals = asArray(raw.intervals).map(normalizeInterval)
+  return intervals.length > 0 ? withTargetIntervals(targets, intervals) : targets
 }
 
 function normalizeExercise(value: unknown): Exercise {
@@ -49,6 +55,7 @@ function normalizeExercise(value: unknown): Exercise {
     brand: isBrandId(raw.brand) ? raw.brand : null,
     machine: asString(raw.machine),
     muscles: normalizeMuscles(raw.muscles, raw.muscleGroup),
+    settings: normalizeCardioSettings(raw.settings),
     notes: asString(raw.notes),
     image: typeof raw.image === 'string' ? raw.image : null,
     defaults: normalizeTargets(raw.defaults),
@@ -80,23 +87,31 @@ function normalizeSet(value: unknown): SetLog {
   return { reps: toSafeNumber(raw.reps), weightKg: toSafeNumber(raw.weightKg), done: raw.done === true }
 }
 
+function normalizeIntervals(raw: Raw, category: CategoryId): Interval[] {
+  const stored = asArray(raw.intervals).map(normalizeInterval)
+  if (stored.length > 0 || categoryOf(category).tracking !== 'duration') return stored
+  return [{ ...createInterval(toSafeNumber(raw.durationMinutes)), done: raw.done === true }]
+}
+
 function normalizeEntry(value: unknown): SessionEntry {
   const raw = asRecord(value)
+  const category: CategoryId = isCategoryId(raw.category) ? raw.category : 'strength'
+  const intervals = normalizeIntervals(raw, category)
   return {
     id: asString(raw.id, createId()),
     exerciseId: asString(raw.exerciseId),
     exerciseName: asString(raw.exerciseName),
-    category: isCategoryId(raw.category) ? raw.category : 'strength',
+    category,
     restSeconds: toSafeNumber(raw.restSeconds),
     sets: asArray(raw.sets).map(normalizeSet),
-    durationMinutes: toSafeNumber(raw.durationMinutes),
+    intervals,
+    durationMinutes: intervals.length > 0 ? totalDuration(intervals) : toSafeNumber(raw.durationMinutes),
     distanceKm: toSafeNumber(raw.distanceKm),
     notes: asString(raw.notes),
-    done: raw.done === true,
   }
 }
 
-function normalizeSession(value: unknown): Session {
+export function normalizeSession(value: unknown): Session {
   const raw = asRecord(value)
   return {
     id: asString(raw.id, createId()),

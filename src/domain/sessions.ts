@@ -1,10 +1,11 @@
-import type { Exercise, ExerciseTargets, Routine, Session, SessionEntry, SetLog } from './types'
+import type { Exercise, ExerciseTargets, Interval, Routine, Session, SessionEntry, SetLog } from './types'
 import type { PerformanceSample } from './metrics'
 import { METRICS } from './metrics'
 import { createId } from './ids'
 import { formatDuration, todayIso } from './dates'
 import { categoryOf, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
+import { settingsUsedIn, startingIntervals, totalDuration } from './intervals'
 
 export function sortSessionsDesc(sessions: readonly Session[]): Session[] {
   return [...sessions].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id))
@@ -35,8 +36,14 @@ function setsFromPrevious(previous: SessionEntry, targets: ExerciseTargets): Set
   })
 }
 
+function intervalsFor(exercise: Exercise, targets: ExerciseTargets, previous: SessionEntry | null): Interval[] {
+  if (categoryOf(exercise.category).tracking !== 'duration') return []
+  return startingIntervals(exercise, previous?.intervals ?? [], targets)
+}
+
 export function createEntry(exercise: Exercise, targets: ExerciseTargets, previous: SessionEntry | null): SessionEntry {
   const hasPreviousSets = previous !== null && previous.sets.length > 0
+  const intervals = intervalsFor(exercise, targets, previous)
   return {
     id: createId(),
     exerciseId: exercise.id,
@@ -44,10 +51,10 @@ export function createEntry(exercise: Exercise, targets: ExerciseTargets, previo
     category: exercise.category,
     restSeconds: targets.restSeconds,
     sets: hasPreviousSets ? setsFromPrevious(previous, targets) : setsFromTargets(targets),
-    durationMinutes: previous?.durationMinutes || targets.durationMinutes,
+    intervals,
+    durationMinutes: intervals.length > 0 ? totalDuration(intervals) : targets.durationMinutes,
     distanceKm: previous?.distanceKm ?? 0,
     notes: '',
-    done: false,
   }
 }
 
@@ -133,9 +140,9 @@ const COMPLETION_RULES: Record<TrackingMode, CompletionRule> = {
     complete: (entry) => ({ ...entry, sets: entry.sets.map((set) => ({ ...set, done: true })) }),
   },
   duration: {
-    isPending: (entry) => !entry.done,
-    isComplete: (entry) => entry.done,
-    complete: (entry) => ({ ...entry, done: true }),
+    isPending: (entry) => entry.intervals.some((interval) => !interval.done),
+    isComplete: (entry) => entry.intervals.length > 0 && entry.intervals.every((interval) => interval.done),
+    complete: (entry) => ({ ...entry, intervals: entry.intervals.map((interval) => ({ ...interval, done: true })) }),
   },
 }
 
@@ -160,6 +167,7 @@ export function describePerformance(entry: SessionEntry): string {
   if (config.tracking === 'duration') {
     const parts = [formatDuration(entry.durationMinutes)]
     if (config.usesDistance && entry.distanceKm > 0) parts.push(`${formatNumber(entry.distanceKm)} km`)
+    if (entry.intervals.length > 1) parts.push(countLabel(entry.intervals.length, 'palier'))
     return parts.filter(Boolean).join(' · ')
   }
   const unit = config.repsUnit === 's' ? ' s' : ''
@@ -187,6 +195,7 @@ export function exerciseFromEntry(entry: SessionEntry): Exercise {
     brand: null,
     machine: '',
     muscles: [],
+    settings: settingsUsedIn(entry.intervals),
     notes: '',
     image: null,
     defaults: { sets: entry.sets.length, reps: 0, weightKg: 0, restSeconds: entry.restSeconds, durationMinutes: entry.durationMinutes },

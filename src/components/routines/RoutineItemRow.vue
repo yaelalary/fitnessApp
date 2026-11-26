@@ -17,7 +17,7 @@ defineEmits<{ 'update:targets': [targets: ExerciseTargets]; 'update:notes': [not
       <span class="numeric step">{{ index + 1 }}</span>
       <DragHandle :item-label="exercise.name" @move="$emit('move', $event)" />
     </ExerciseSummary>
-    <TargetsEditor :targets="item.targets" :category="exercise.category" @update:targets="$emit('update:targets', $event)" />
+    <TargetsEditor :targets="item.targets" :category="exercise.category" :settings="exercise.settings" @update:targets="$emit('update:targets', $event)" />
     <NoteField
       :model-value="item.notes"
       placeholder="Une consigne pour cet exercice…"

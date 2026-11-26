@@ -1,7 +1,9 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ done: boolean; label: string; marker?: string; tag?: 'li' | 'div' }>(), {
+withDefaults(defineProps<{ done?: boolean; label: string; marker?: string; tag?: 'li' | 'div'; checkable?: boolean }>(), {
+  done: false,
   marker: '',
   tag: 'div',
+  checkable: true,
 })
 const emit = defineEmits<{ 'update:done': [value: boolean] }>()
 defineSlots<{ default(): unknown; actions?(): unknown }>()
@@ -13,7 +15,7 @@ function onChange(event: Event) {
 
 <template>
   <component :is="tag" class="row" :class="{ 'row--done': done }">
-    <input type="checkbox" :checked="done" :aria-label="label" @change="onChange" />
+    <input v-if="checkable" type="checkbox" :checked="done" :aria-label="label" @change="onChange" />
     <span v-if="marker" class="numeric row__marker" aria-hidden="true">{{ marker }}</span>
     <div class="row__fields">
       <slot />

@@ -95,13 +95,16 @@ describe('normalizeProfile', () => {
     expect(profile?.sessions).toEqual([])
   })
 
-  it('garde l’état coché des exercices et le met à faux sur les anciennes séances', () => {
+  it('transforme l’ancien cardio en un palier unique, en gardant sa durée et son état coché', () => {
     const profile = normalizeProfile({
       id: 'p',
       name: 'Alex',
-      sessions: [{ id: 's', date: '2026-11-20', entries: [{ id: 'a', category: 'cardio', done: true }, { id: 'b', category: 'cardio' }] }],
+      sessions: [{ id: 's', date: '2026-11-20', entries: [{ id: 'a', category: 'cardio', durationMinutes: 20, done: true }, { id: 'b', category: 'cardio' }] }],
     })
-    expect(profile?.sessions[0].entries.map((entry) => entry.done)).toEqual([true, false])
+    const [first, second] = profile?.sessions[0].entries ?? []
+    expect(first.intervals).toEqual([{ durationMinutes: 20, values: {}, done: true }])
+    expect(first.durationMinutes).toBe(20)
+    expect(second.intervals).toEqual([{ durationMinutes: 0, values: {}, done: false }])
   })
 
   it('garde la note des exercices de parcours et la crée vide sur les anciens parcours', () => {

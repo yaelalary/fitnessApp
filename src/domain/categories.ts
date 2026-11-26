@@ -14,6 +14,7 @@ export interface CategoryConfig {
   usesRest: boolean
   usesDistance: boolean
   usesMachine: boolean
+  usesSettings: boolean
   metrics: MetricId[]
   defaults: ExerciseTargets
 }
@@ -30,6 +31,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesRest: false,
     usesDistance: false,
     usesMachine: true,
+    usesSettings: true,
     metrics: ['duration'],
     defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 10 },
   },
@@ -44,6 +46,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesRest: true,
     usesDistance: false,
     usesMachine: true,
+    usesSettings: false,
     metrics: ['maxWeight', 'estimatedOneRepMax', 'volume', 'totalReps', 'bestSetReps'],
     defaults: { sets: 3, reps: 10, weightKg: 0, restSeconds: 90, durationMinutes: 0 },
   },
@@ -58,6 +61,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesRest: false,
     usesDistance: true,
     usesMachine: true,
+    usesSettings: true,
     metrics: ['duration', 'distance', 'speed'],
     defaults: { sets: 0, reps: 0, weightKg: 0, restSeconds: 0, durationMinutes: 20 },
   },
@@ -72,6 +76,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     usesRest: true,
     usesDistance: false,
     usesMachine: false,
+    usesSettings: false,
     metrics: ['totalHold'],
     defaults: { sets: 2, reps: 30, weightKg: 0, restSeconds: 15, durationMinutes: 0 },
   },

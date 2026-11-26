@@ -5,7 +5,9 @@ import { createId } from './ids'
 import { describeMuscles } from './muscles'
 import { searchableText } from './text'
 import { formatDuration, formatRest } from './dates'
-import { formatNumber } from './numbers'
+import { countLabel, formatNumber } from './numbers'
+import { applySettings, targetIntervals, withTargetIntervals } from './intervals'
+import type { CardioSettingId } from './cardioSettings'
 import { nonNegative, requiredText, type ValidationErrors } from './validation'
 
 export type ExerciseField = 'name' | 'sets' | 'reps' | 'weightKg' | 'restSeconds' | 'durationMinutes'
@@ -18,10 +20,15 @@ export function createExercise(category: CategoryId = 'strength'): Exercise {
     brand: null,
     machine: '',
     muscles: [],
+    settings: [],
     notes: '',
     image: null,
     defaults: { ...CATEGORIES[category].defaults },
   }
+}
+
+export function changeExerciseSettings(exercise: Exercise, settings: CardioSettingId[]): Exercise {
+  return { ...exercise, settings, defaults: withTargetIntervals(exercise.defaults, applySettings(targetIntervals(exercise.defaults), settings)) }
 }
 
 export function changeExerciseCategory(exercise: Exercise, category: CategoryId): Exercise {
@@ -57,7 +64,9 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
 export function describeTargets(targets: ExerciseTargets, category: CategoryId): string {
   const config = categoryOf(category)
   if (config.tracking === 'duration') {
-    return formatDuration(targets.durationMinutes) || 'Durée libre'
+    const steps = targets.intervals?.length ?? 0
+    const duration = formatDuration(targets.durationMinutes) || 'Durée libre'
+    return steps > 1 ? `${duration} · ${countLabel(steps, 'palier')}` : duration
   }
   const parts = [`${targets.sets} × ${targets.reps}${config.repsUnit === 's' ? ' s' : ''}`]
   if (config.usesWeight && targets.weightKg > 0) parts.push(`${formatNumber(targets.weightKg)} kg`)
