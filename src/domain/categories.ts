@@ -1,5 +1,6 @@
 import type { CategoryId, ExerciseTargets } from './types'
 import type { MetricId } from './metrics'
+import { HOLDS, SERIES, type SetNoun } from './setNouns'
 
 export type TrackingMode = 'sets' | 'duration'
 
@@ -8,6 +9,7 @@ export interface CategoryConfig {
   label: string
   pluralLabel: string
   tracking: TrackingMode
+  setNoun: SetNoun
   repsLabel: string
   repsUnit: string
   usesWeight: boolean
@@ -25,6 +27,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     label: 'Échauffement',
     pluralLabel: 'Échauffements',
     tracking: 'duration',
+    setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
     usesWeight: false,
@@ -40,6 +43,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     label: 'Musculation',
     pluralLabel: 'Musculation',
     tracking: 'sets',
+    setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
     usesWeight: true,
@@ -55,6 +59,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     label: 'Cardio',
     pluralLabel: 'Cardio',
     tracking: 'duration',
+    setNoun: SERIES,
     repsLabel: 'Répétitions',
     repsUnit: 'reps',
     usesWeight: false,
@@ -70,7 +75,8 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     label: 'Étirement',
     pluralLabel: 'Étirements',
     tracking: 'sets',
-    repsLabel: 'Maintien (s)',
+    setNoun: HOLDS,
+    repsLabel: 'Durée (s)',
     repsUnit: 's',
     usesWeight: false,
     usesRest: true,

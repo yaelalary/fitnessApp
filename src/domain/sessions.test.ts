@@ -185,6 +185,13 @@ describe('summarizeSession', () => {
     expect(summarizeSession(session).cardioMinutes).toBe(25.5)
     expect(describeSessionSummary(summarizeSession(session))).toBe('4 exercices · 2 séries · 760 kg soulevés · 25 min 30 de cardio')
   })
+
+  it('ne compte pas les maintiens d’étirement comme des séries', () => {
+    const base = history[0].entries[0]
+    const stretch = { ...base, id: 's', category: 'stretching' as const, sets: [{ reps: 30, weightKg: 0, done: true }] }
+    const session: Session = { ...history[0], entries: [base, stretch] }
+    expect(describeSessionSummary(summarizeSession(session))).toBe('2 exercices · 2 séries · 760 kg soulevés')
+  })
 })
 
 describe('routineItemNote', () => {

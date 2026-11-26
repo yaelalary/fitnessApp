@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Exercise, SessionEntry, SetLog } from '@/domain/types'
 import { categoryOf } from '@/domain/categories'
+import { setNounTitle } from '@/domain/setNouns'
 import { addSet, describePerformance, isEntryComplete, removeSet, updateSet } from '@/domain/sessions'
 import AppButton from '@/components/ui/AppButton.vue'
 import DragHandle from '@/components/ui/DragHandle.vue'
@@ -23,6 +24,7 @@ const props = defineProps<{
 const emit = defineEmits<{ update: [entry: SessionEntry]; move: [offset: -1 | 1]; remove: [] }>()
 
 const config = computed(() => categoryOf(props.entry.category))
+const addSetLabel = computed(() => setNounTitle(config.value.setNoun))
 const previousSummary = computed(() => (props.previous ? describePerformance(props.previous) : ''))
 const complete = computed(() => isEntryComplete(props.entry))
 const instructions = computed(() => [props.exercise.notes.trim(), props.routineNote ?? ''].filter((note) => note !== ''))
@@ -57,7 +59,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
         />
       </ol>
       <div class="cluster">
-        <AppButton size="sm" icon="plus" @click="emit('update', addSet(entry))">Série</AppButton>
+        <AppButton size="sm" icon="plus" @click="emit('update', addSet(entry))">{{ addSetLabel }}</AppButton>
         <RestTimer v-if="config.usesRest" :seconds="entry.restSeconds" />
       </div>
     </template>

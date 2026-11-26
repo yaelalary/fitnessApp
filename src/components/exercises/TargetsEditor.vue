@@ -5,6 +5,7 @@ import type { ExerciseField } from '@/domain/exercises'
 import type { ValidationErrors } from '@/domain/validation'
 import type { CardioSettingId } from '@/domain/cardioSettings'
 import { categoryOf, REST_STEP_SECONDS, WEIGHT_STEP_KG } from '@/domain/categories'
+import { setNounTitle } from '@/domain/setNouns'
 import FormField from '@/components/ui/FormField.vue'
 import TargetIntervalsEditor from './TargetIntervalsEditor.vue'
 import NumberStepper from '@/components/ui/NumberStepper.vue'
@@ -17,6 +18,7 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:targets': [value: ExerciseTargets] }>()
 
 const config = computed(() => categoryOf(props.category))
+const setsLabel = computed(() => setNounTitle(config.value.setNoun, true))
 
 function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[K]) {
   emit('update:targets', { ...props.targets, [key]: value })
@@ -25,12 +27,12 @@ function update<K extends keyof ExerciseTargets>(key: K, value: ExerciseTargets[
 
 <template>
   <div v-if="config.tracking === 'sets'" class="grid-fields">
-    <FormField v-slot="field" label="Séries" :error="errors.sets">
+    <FormField v-slot="field" :label="setsLabel" :error="errors.sets">
       <NumberStepper
         :id="field.id"
         :described-by="field.describedBy"
         :invalid="field.invalid"
-        label="séries"
+        :label="setsLabel"
         :min="1"
         :max="20"
         :model-value="targets.sets"

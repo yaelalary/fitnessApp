@@ -5,6 +5,7 @@ import { createId } from './ids'
 import { formatDuration, todayIso } from './dates'
 import { categoryOf, type TrackingMode } from './categories'
 import { countLabel, formatNumber } from './numbers'
+import { SERIES } from './setNouns'
 import { settingsUsedIn, startingIntervals, totalDuration } from './intervals'
 
 export function sortSessionsDesc(sessions: readonly Session[]): Session[] {
@@ -118,9 +119,10 @@ function cardioMinutesOf(session: Session): number {
 
 export function summarizeSession(session: Session): SessionSummary {
   const sample = mergeSamples(session.entries.map(entryToSample))
+  const seriesEntries = session.entries.filter((entry) => categoryOf(entry.category).setNoun === SERIES)
   return {
     exerciseCount: session.entries.length,
-    setCount: sample.sets.length,
+    setCount: seriesEntries.reduce((sum, entry) => sum + entry.sets.length, 0),
     completedSetCount: sample.sets.filter((set) => set.done).length,
     volumeKg: METRICS.volume.compute(sample) ?? 0,
     cardioMinutes: cardioMinutesOf(session),

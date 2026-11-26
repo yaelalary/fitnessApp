@@ -51,7 +51,7 @@ export function validateExercise(exercise: Exercise): ValidationErrors<ExerciseF
     name: requiredText(exercise.name, "Donne un nom à l'exercice."),
   }
   if (config.tracking === 'sets') {
-    errors.sets = exercise.defaults.sets < 1 ? 'Au moins une série.' : undefined
+    errors.sets = exercise.defaults.sets < 1 ? config.setNoun.atLeastOne : undefined
     errors.reps = exercise.defaults.reps < 1 ? 'Au moins une répétition.' : undefined
     errors.weightKg = nonNegative(exercise.defaults.weightKg, 'La charge ne peut pas être négative.')
     errors.restSeconds = nonNegative(exercise.defaults.restSeconds, 'La récupération ne peut pas être négative.')
