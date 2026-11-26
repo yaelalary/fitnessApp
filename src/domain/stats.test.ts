@@ -59,8 +59,8 @@ describe('buildProgression', () => {
       session('c', '2026-03-05', [entry({ exerciseId: 'other', sets: [set(10, 99)] })]),
     ]
     expect(buildProgression(sessions, 'press', 'maxWeight')).toEqual([
-      { sessionId: 'a', date: '2026-03-01', value: 45 },
-      { sessionId: 'b', date: '2026-03-10', value: 50 },
+      { id: 'a', date: '2026-03-01', value: 45 },
+      { id: 'b', date: '2026-03-10', value: 50 },
     ])
   })
 })
@@ -68,9 +68,9 @@ describe('buildProgression', () => {
 describe('summarizeProgression', () => {
   it('donne premier, dernier, meilleur et évolution', () => {
     const summary = summarizeProgression([
-      { sessionId: 'a', date: '2026-01-01', value: 40 },
-      { sessionId: 'b', date: '2026-01-08', value: 55 },
-      { sessionId: 'c', date: '2026-01-15', value: 50 },
+      { id: 'a', date: '2026-01-01', value: 40 },
+      { id: 'b', date: '2026-01-08', value: 55 },
+      { id: 'c', date: '2026-01-15', value: 50 },
     ])
     expect(summary).toEqual({ first: 40, last: 50, best: 55, changePercent: 25, count: 3 })
   })

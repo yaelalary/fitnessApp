@@ -5,7 +5,7 @@ import { addDaysIso, daysBetween, startOfWeekIso } from './dates'
 import { percentChange } from './numbers'
 
 export interface ProgressPoint {
-  sessionId: string
+  id: string
   date: string
   value: number
 }
@@ -18,7 +18,7 @@ export function buildProgression(sessions: readonly Session[], exerciseId: strin
       const entries = session.entries.filter((entry) => entry.exerciseId === exerciseId)
       if (entries.length === 0) return []
       const value = metric.compute(mergeSamples(entries.map(entryToSample)))
-      return value === null ? [] : [{ sessionId: session.id, date: session.date, value }]
+      return value === null ? [] : [{ id: session.id, date: session.date, value }]
     })
 }
 

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Exercise, ExerciseTargets, FileChanges, ImageStore, Profile, Routine, Session, WorkoutSnapshot } from '@/domain/types'
+import type { Exercise, ExerciseTargets, FileChanges, ImageStore, Measure, Profile, Routine, Session, WorkoutSnapshot } from '@/domain/types'
 import { applyTargetsToExercise } from '@/domain/exerciseDefaults'
 import { findById, indexById, removeById, upsertById } from '@/domain/collections'
 import { sortExercises } from '@/domain/exercises'
@@ -44,6 +44,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     [...(activeProfile.value?.routines ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'fr')),
   )
   const sessions = computed(() => sortSessionsDesc(activeProfile.value?.sessions ?? []))
+  const measures = computed(() => activeProfile.value?.measures ?? [])
   const storageKind = computed<FileStore['kind']>(() => (settings.isGistConnected ? 'gist' : 'local'))
 
   function fileStore(): FileStore {
@@ -99,6 +100,15 @@ export const useWorkoutStore = defineStore('workout', () => {
     if (!exercise) throw new Error('Cet exercice n’existe plus.')
     const updated = applyTargetsToExercise(exercise, targets)
     await updateActiveProfile((profile) => ({ ...profile, exercises: upsertById(profile.exercises, updated) }))
+  }
+
+  async function saveMeasure(measure: Measure) {
+    const saved = { ...measure, name: measure.name.trim(), unit: measure.unit.trim() }
+    await updateActiveProfile((profile) => ({ ...profile, measures: upsertById(profile.measures, saved) }))
+  }
+
+  async function deleteMeasure(measureId: string) {
+    await updateActiveProfile((profile) => ({ ...profile, measures: removeById(profile.measures, measureId) }))
   }
 
   async function deleteExercise(exerciseId: string) {
@@ -186,10 +196,13 @@ export const useWorkoutStore = defineStore('workout', () => {
     exercisesById,
     routines,
     sessions,
+    measures,
     storageKind,
     load,
     saveExercise,
     updateExerciseDefaults,
+    saveMeasure,
+    deleteMeasure,
     deleteExercise,
     saveRoutine,
     deleteRoutine,

@@ -16,6 +16,7 @@ import ProgressChart from '@/components/stats/ProgressChart.vue'
 import ProgressTable from '@/components/stats/ProgressTable.vue'
 import WeeklyChart from '@/components/stats/WeeklyChart.vue'
 import ActivityTiles from '@/components/stats/ActivityTiles.vue'
+import MeasuresSection from '@/components/measures/MeasuresSection.vue'
 
 const WEEKS_SHOWN = 12
 const RECENT_DAYS = 30
@@ -64,57 +65,60 @@ const summaryTiles = computed(() => {
   <div class="page">
     <PageHeader title="Statistiques" subtitle="Ta progression" />
 
-    <EmptyState
-      v-if="workout.sessions.length === 0"
-      icon="chart"
-      title="Pas encore de données"
-      message="Enregistre quelques séances : tes charges, répétitions et ta régularité apparaîtront ici."
-    />
+    <div class="stats">
+      <EmptyState
+        v-if="workout.sessions.length === 0"
+        icon="chart"
+        title="Pas encore de séance"
+        message="Enregistre quelques séances : tes charges, répétitions et ta régularité apparaîtront ici."
+      />
+      <template v-else>
+        <section class="stack">
+          <h2 class="section-title">{{ activityTitle }}</h2>
+          <ActivityTiles :activity="activity" />
+        </section>
 
-    <div v-else class="stats">
-      <section class="stack">
-        <h2 class="section-title">{{ activityTitle }}</h2>
-        <ActivityTiles :activity="activity" />
-      </section>
+        <section class="stack">
+          <h2 class="section-title">Séances par semaine</h2>
+          <div class="card">
+            <WeeklyChart :weeks="weeks" />
+          </div>
+        </section>
 
-      <section class="stack">
-        <h2 class="section-title">Séances par semaine</h2>
-        <div class="card">
-          <WeeklyChart :weeks="weeks" />
-        </div>
-      </section>
-
-      <section class="stack">
-        <h2 class="section-title">Progression par exercice</h2>
-        <p v-if="trackedExercises.length === 0" class="muted">Aucun exercice suivi dans tes séances pour l’instant.</p>
-        <template v-else>
-          <FormField v-slot="field" label="Exercice">
-            <select :id="field.id" v-model="exerciseId">
-              <option v-for="item in trackedExercises" :key="item.id" :value="item.id">{{ item.name }}</option>
-            </select>
-          </FormField>
-          <SegmentedControl v-if="metricOptions.length > 1" v-model="metricId" :options="metricOptions" label="Mesure" />
-
-          <p v-if="points.length === 0" class="muted">Pas de valeur pour cette mesure.</p>
+        <section class="stack">
+          <h2 class="section-title">Progression par exercice</h2>
+          <p v-if="trackedExercises.length === 0" class="muted">Aucun exercice suivi dans tes séances pour l’instant.</p>
           <template v-else>
-            <div class="grid-3">
-              <StatTile
-                v-for="tile in summaryTiles"
-                :key="tile.label"
-                :label="tile.label"
-                :value="tile.value"
-                :unit="tile.unit"
-                :hint="tile.hint"
-              />
-            </div>
-            <div class="card stack">
-              <h3 class="section-title">{{ metric.label }}</h3>
-              <ProgressChart :points="points" :label="metric.label" :unit="metric.unit" />
-              <ProgressTable :points="points" :label="metric.label" :unit="metric.unit" />
-            </div>
+            <FormField v-slot="field" label="Exercice">
+              <select :id="field.id" v-model="exerciseId">
+                <option v-for="item in trackedExercises" :key="item.id" :value="item.id">{{ item.name }}</option>
+              </select>
+            </FormField>
+            <SegmentedControl v-if="metricOptions.length > 1" v-model="metricId" :options="metricOptions" label="Mesure" />
+
+            <p v-if="points.length === 0" class="muted">Pas de valeur pour cette mesure.</p>
+            <template v-else>
+              <div class="grid-3">
+                <StatTile
+                  v-for="tile in summaryTiles"
+                  :key="tile.label"
+                  :label="tile.label"
+                  :value="tile.value"
+                  :unit="tile.unit"
+                  :hint="tile.hint"
+                />
+              </div>
+              <div class="card stack">
+                <h3 class="section-title">{{ metric.label }}</h3>
+                <ProgressChart :points="points" :label="metric.label" :unit="metric.unit" />
+                <ProgressTable :points="points" :label="metric.label" :unit="metric.unit" />
+              </div>
+            </template>
           </template>
-        </template>
-      </section>
+        </section>
+      </template>
+
+      <MeasuresSection :today="today" />
     </div>
   </div>
 </template>

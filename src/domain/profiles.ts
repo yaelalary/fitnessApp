@@ -3,6 +3,8 @@ import type {
   Exercise,
   ExerciseTargets,
   Interval,
+  Measure,
+  MeasureEntry,
   Profile,
   Routine,
   RoutineItem,
@@ -126,6 +128,23 @@ export function normalizeSession(value: unknown): Session {
   }
 }
 
+function normalizeMeasureEntry(value: unknown): MeasureEntry {
+  const raw = asRecord(value)
+  return { id: asString(raw.id, createId()), date: asString(raw.date), value: toSafeNumber(raw.value) }
+}
+
+function normalizeMeasure(value: unknown): Measure {
+  const raw = asRecord(value)
+  return {
+    id: asString(raw.id, createId()),
+    name: asString(raw.name).trim(),
+    unit: asString(raw.unit).trim(),
+    entries: asArray(raw.entries)
+      .map(normalizeMeasureEntry)
+      .filter((entry) => entry.date !== ''),
+  }
+}
+
 export function normalizeProfile(value: unknown): Profile | null {
   const raw = asRecord(value)
   if (typeof raw.id !== 'string' || typeof raw.name !== 'string') return null
@@ -135,6 +154,7 @@ export function normalizeProfile(value: unknown): Profile | null {
     exercises: asArray(raw.exercises).map(normalizeExercise),
     routines: asArray(raw.routines).map(normalizeRoutine),
     sessions: asArray(raw.sessions).map(normalizeSession).filter((session) => session.date !== ''),
+    measures: asArray(raw.measures).map(normalizeMeasure).filter((measure) => measure.name !== ''),
     updatedAt: asString(raw.updatedAt),
   }
 }
@@ -144,7 +164,7 @@ export function serializeProfile(profile: Profile): string {
   return JSON.stringify({ ...profile, exercises }, null, 1)
 }
 export function createProfile(name: string, now: Date = new Date()): Profile {
-  return { id: createId(), name: name.trim(), exercises: [], routines: [], sessions: [], updatedAt: now.toISOString() }
+  return { id: createId(), name: name.trim(), exercises: [], routines: [], sessions: [], measures: [], updatedAt: now.toISOString() }
 }
 
 export function touchProfile(profile: Profile, now: Date = new Date()): Profile {

@@ -88,7 +88,21 @@ export interface Profile {
   exercises: Exercise[]
   routines: Routine[]
   sessions: Session[]
+  measures: Measure[]
   updatedAt: string
+}
+
+export interface MeasureEntry {
+  id: string
+  date: string
+  value: number
+}
+
+export interface Measure {
+  id: string
+  name: string
+  unit: string
+  entries: MeasureEntry[]
 }
 
 export type ImageStore = Record<string, string>
