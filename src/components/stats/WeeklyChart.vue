@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
 import type { ChartData, ChartOptions } from 'chart.js'
 import type { WeekCount } from '@/domain/stats'
-import { formatShortDate } from '@/domain/dates'
+import { formatWeekRange } from '@/domain/dates'
 import { countLabel } from '@/domain/numbers'
 import { useThemeTokens } from '@/composables/useThemeTokens'
 import ChartFrame from './ChartFrame.vue'
@@ -14,7 +14,7 @@ const props = defineProps<{ weeks: WeekCount[] }>()
 const tokens = useThemeTokens(CHART_TOKENS)
 
 const data = computed<ChartData<'bar'>>(() => ({
-  labels: props.weeks.map((week) => formatShortDate(week.weekStart)),
+  labels: props.weeks.map((week) => formatWeekRange(week.weekStart)),
   datasets: [
     {
       label: 'Séances',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { changeExerciseCategory, createExercise, describeTargets, filterExercises, validateExercise } from './exercises'
 import { moveItem, upsertById } from './collections'
-import { formatDuration, formatRest, joinMinutes, splitMinutes, startOfWeekIso } from './dates'
+import { formatDuration, formatRest, joinMinutes, formatWeekRange, splitMinutes, startOfWeekIso } from './dates'
 import { validateRoutine, removeExerciseFromRoutines, createRoutine } from './routines'
 import { hasErrors } from './validation'
 
@@ -90,6 +90,11 @@ describe('dates', () => {
   it('trouve le lundi de la semaine', () => {
     expect(startOfWeekIso('2026-11-22')).toBe('2026-11-16')
     expect(startOfWeekIso('2026-11-16')).toBe('2026-11-16')
+  })
+
+  it("affiche une semaine comme une plage du lundi au dimanche, pas comme un jour", () => {
+    expect(formatWeekRange("2026-11-16")).toBe("16–22 nov.")
+    expect(formatWeekRange("2026-10-26")).toBe("26 oct. – 1 nov.")
   })
 })
 

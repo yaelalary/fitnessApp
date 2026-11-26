@@ -49,6 +49,13 @@ export function formatShortDate(isoDate: string): string {
   return shortDateFormat.format(parseIsoDate(isoDate))
 }
 
+export function formatWeekRange(weekStartIso: string): string {
+  const start = parseIsoDate(weekStartIso)
+  const end = parseIsoDate(addDaysIso(weekStartIso, 6))
+  if (start.getMonth() === end.getMonth()) return `${start.getDate()}–${shortDateFormat.format(end)}`
+  return `${shortDateFormat.format(start)} – ${shortDateFormat.format(end)}`
+}
+
 export function formatRest(seconds: number): string {
   if (seconds <= 0) return 'Aucune'
   const minutes = Math.floor(seconds / 60)
