@@ -12,6 +12,7 @@ const props = withDefaults(
     variant?: Variant
     size?: Size
     to?: RouteLocationRaw
+    href?: string
     type?: 'button' | 'submit'
     icon?: IconName
     iconOnly?: boolean
@@ -26,6 +27,7 @@ const props = withDefaults(
 defineEmits<{ click: [event: MouseEvent] }>()
 
 const isLink = computed(() => props.to !== undefined && !props.disabled)
+const isExternal = computed(() => props.href !== undefined && !props.disabled)
 const isBusy = computed(() => props.loading || props.disabled)
 const classes = computed(() => [
   'button',
@@ -40,6 +42,17 @@ const classes = computed(() => [
     <AppIcon v-if="icon" :name="icon" />
     <span v-if="!iconOnly"><slot>{{ label }}</slot></span>
   </RouterLink>
+  <a
+    v-else-if="isExternal"
+    :href="href"
+    target="_blank"
+    rel="noopener noreferrer"
+    :class="classes"
+    :aria-label="iconOnly ? label : undefined"
+  >
+    <AppIcon v-if="icon" :name="icon" />
+    <span v-if="!iconOnly"><slot>{{ label }}</slot></span>
+  </a>
   <button
     v-else
     :type="type"

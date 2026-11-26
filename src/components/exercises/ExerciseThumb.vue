@@ -1,12 +1,36 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 
-withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' | 'square' }>(), { size: 'md' })
+const props = withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' | 'square' }>(), { size: 'md' })
+
+const loaded = ref(false)
+const failed = ref(false)
+
+watch(
+  () => props.src,
+  () => {
+    loaded.value = false
+    failed.value = false
+  },
+)
+
+const showsImage = computed(() => props.src !== null && !failed.value)
+const loading = computed(() => showsImage.value && !loaded.value)
 </script>
 
 <template>
-  <div class="thumb" :class="`thumb--${size}`">
-    <img v-if="src" :src="src" :alt="alt" loading="lazy" />
+  <div class="thumb" :class="[`thumb--${size}`, { skeleton: loading }]" :aria-busy="loading || undefined">
+    <img
+      v-if="showsImage && src"
+      :src="src"
+      :alt="alt"
+      loading="lazy"
+      class="thumb__image"
+      :class="{ 'thumb__image--loaded': loaded }"
+      @load="loaded = true"
+      @error="failed = true"
+    />
     <AppIcon v-else name="dumbbell" />
   </div>
 </template>
@@ -23,7 +47,7 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
   color: var(--color-text-faint);
 }
 
-.thumb img {
+.thumb__image {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -31,6 +55,12 @@ withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' |
   padding: var(--space-1);
   object-fit: contain;
   mix-blend-mode: var(--image-blend);
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--easing);
+}
+
+.thumb__image--loaded {
+  opacity: 1;
 }
 
 .thumb--sm {

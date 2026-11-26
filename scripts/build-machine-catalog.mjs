@@ -206,8 +206,14 @@ function render(catalog) {
   ]
   for (const [brand, machines] of Object.entries(catalog)) {
     lines.push(`  ${JSON.stringify(brand)}: [`)
-    for (const { name, line, imageUrl } of machines) {
-      lines.push(`    { name: ${JSON.stringify(name)}, line: ${JSON.stringify(line)}, imageUrl: ${JSON.stringify(imageUrl)} },`)
+    for (const { name, line, imageUrl, source } of machines) {
+      const fields = [
+        `name: ${JSON.stringify(name)}`,
+        `line: ${JSON.stringify(line)}`,
+        `imageUrl: ${JSON.stringify(imageUrl)}`,
+        `pageUrl: ${JSON.stringify(source ?? null)}`,
+      ]
+      lines.push(`    { ${fields.join(', ')} },`)
     }
     lines.push('  ],')
   }

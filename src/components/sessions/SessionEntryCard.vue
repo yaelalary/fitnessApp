@@ -44,7 +44,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
 
 <template>
   <article class="card stack entry" :class="{ 'entry--complete': complete }">
-    <ExerciseSummary :exercise="exercise" :image-src="imageSrc">
+    <ExerciseSummary :exercise="exercise" :image-src="imageSrc" zoomable>
       <DragHandle :item-label="exercise.name" @move="emit('move', $event)" />
     </ExerciseSummary>
     <p v-if="previousSummary" class="small muted">Dernière fois : {{ previousSummary }}</p>

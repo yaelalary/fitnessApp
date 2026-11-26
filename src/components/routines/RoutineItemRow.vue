@@ -21,7 +21,7 @@ defineEmits<{
 
 <template>
   <article class="card stack">
-    <ExerciseSummary :exercise="exercise" :image-src="imageSrc">
+    <ExerciseSummary :exercise="exercise" :image-src="imageSrc" zoomable>
       <span class="numeric step">{{ index + 1 }}</span>
       <DragHandle :item-label="exercise.name" @move="$emit('move', $event)" />
     </ExerciseSummary>

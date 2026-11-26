@@ -50,6 +50,7 @@
   --duration-fast: 120ms;
   --duration-medium: 220ms;
   --duration-spin: 900ms;
+  --duration-pulse: 1.2s;
   --easing: cubic-bezier(0.2, 0, 0, 1);
 
   --z-sticky: 10;

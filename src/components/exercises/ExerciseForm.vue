@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { BrandId, CategoryId, Exercise } from '@/domain/types'
 import type { ImageInput } from '@/domain/images'
 import { CATEGORIES, CATEGORY_ORDER, categoryOf } from '@/domain/categories'
-import { BRANDS, BRAND_ORDER, machineImageUrl, type CatalogEntry } from '@/domain/machines'
+import { BRANDS, BRAND_ORDER, machineImageUrl, machinePageUrl, type CatalogEntry } from '@/domain/machines'
 import { muscleOptionGroups } from '@/domain/muscles'
 import { cardioSettingOptions, normalizeCardioSettings, type CardioSettingId } from '@/domain/cardioSettings'
 import { changeExerciseBrand, changeExerciseCategory, changeExerciseSettings, selectCatalogMachine, type ExerciseField } from '@/domain/exercises'
@@ -39,6 +39,7 @@ const catalogImageSrc = computed(() =>
   config.value.usesMachine ? machineImageUrl(props.draft.brand, props.draft.machine) : null,
 )
 const imageAlt = computed(() => props.draft.machine || props.draft.name)
+const machinePage = computed(() => machinePageUrl(props.draft.brand, props.draft.machine))
 
 function replaceDraft(draft: Exercise) {
   emit('update:draft', draft)
@@ -99,6 +100,9 @@ function pickMachine(entry: CatalogEntry) {
       <FormField v-slot="field" label="Machine">
         <MachineField :id="field.id" v-model="machine" :brand="draft.brand" @pick="pickMachine" />
       </FormField>
+      <div v-if="machinePage">
+        <AppButton :href="machinePage" size="sm" icon="external">Voir la machine sur le site du fabricant</AppButton>
+      </div>
       <FormField v-slot="field" label="Marque" hint="Remplie toute seule quand tu choisis une machine du catalogue.">
         <select :id="field.id" :value="draft.brand ?? ''" :aria-describedby="field.describedBy" @change="setBrand">
           <option value="">Aucune</option>

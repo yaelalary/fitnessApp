@@ -9,6 +9,7 @@ import {
   findMachine,
   isBrandId,
   machineImageUrl,
+  machinePageUrl,
   machineThumbnailUrl,
 } from './machines'
 import { MACHINE_CATALOG, PREVIOUS_MACHINE_NAMES } from './machineCatalog'
@@ -49,6 +50,27 @@ describe('catalogue des machines', () => {
   it('n’a que des images en https', () => {
     const urls = Object.values(MACHINE_CATALOG).flatMap((machines) => machines.map((machine) => machine.imageUrl))
     expect(urls.filter((url) => url !== null).every((url) => url!.startsWith('https://'))).toBe(true)
+  })
+})
+
+describe('page de la machine en ligne', () => {
+  it('donne la page officielle de chaque machine du catalogue', () => {
+    for (const brand of ['technogym', 'hammer-strength'] as const) {
+      const pages = MACHINE_CATALOG[brand].map((machine) => machine.pageUrl)
+      expect(pages.every((url) => url !== null && url.startsWith('https://'))).toBe(true)
+    }
+  })
+
+  it('retrouve la page depuis le nom enregistré sur l’exercice, y compris un ancien nom', () => {
+    expect(machinePageUrl('technogym', 'Selection 700 Dual Pectoral / Reverse Fly')).toBe(
+      'https://www.technogym.com/fr-FR/product/selection-700-dual-pectoral-reverse-fly_MNNC.html',
+    )
+    expect(machinePageUrl('technogym', 'Leg Press')).toMatch(/^https:\/\/www\.technogym\.com\//)
+  })
+
+  it('n’a pas de page pour les poids libres ni pour une machine inconnue', () => {
+    expect(machinePageUrl('free-weights', 'Haltères')).toBeNull()
+    expect(machinePageUrl('technogym', 'Presse maison')).toBeNull()
   })
 })
 

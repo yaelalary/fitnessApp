@@ -5,6 +5,7 @@ export interface GeneratedMachine {
   name: string
   line: string
   imageUrl: string | null
+  pageUrl: string | null
 }
 
 export interface MachineModel extends GeneratedMachine {
@@ -62,7 +63,7 @@ function withPreviousNames(brand: BrandId, machines: GeneratedMachine[]): Machin
 export const MACHINE_CATALOG: Record<BrandId, MachineModel[]> = {
   technogym: withPreviousNames('technogym', GENERATED_MACHINES.technogym),
   'hammer-strength': withPreviousNames('hammer-strength', GENERATED_MACHINES['hammer-strength']),
-  'free-weights': FREE_WEIGHTS.map((name) => ({ name, line: FREE_WEIGHTS_LINE, imageUrl: null, aliases: [] })),
+  'free-weights': FREE_WEIGHTS.map((name) => ({ name, line: FREE_WEIGHTS_LINE, imageUrl: null, pageUrl: null, aliases: [] })),
   other: [],
 }
 

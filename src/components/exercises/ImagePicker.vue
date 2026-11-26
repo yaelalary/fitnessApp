@@ -7,7 +7,7 @@ import { useAsyncAction } from '@/composables/useAsyncAction'
 import AppButton from '@/components/ui/AppButton.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import FormField from '@/components/ui/FormField.vue'
-import ExerciseThumb from './ExerciseThumb.vue'
+import ZoomableThumb from './ZoomableThumb.vue'
 
 const props = defineProps<{ modelValue: ImageInput; currentSrc: string | null; fallbackSrc: string | null; alt: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: ImageInput] }>()
@@ -44,7 +44,7 @@ function applyUrl() {
 
 <template>
   <div class="stack">
-    <ExerciseThumb :src="previewSrc" :alt="alt" size="lg" />
+    <ZoomableThumb :src="previewSrc" :alt="alt" size="lg" />
     <p v-if="showsCatalogImage" class="muted small">Photo officielle de la machine. Tu peux la remplacer par la tienne.</p>
     <input ref="fileInput" type="file" accept="image/*" capture="environment" @change="onFileSelected" />
     <div class="cluster">

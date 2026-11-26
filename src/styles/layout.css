@@ -148,3 +148,20 @@
     transform: rotate(360deg);
   }
 }
+
+.skeleton {
+  background: var(--color-surface-sunken);
+  animation: pulse var(--duration-pulse) var(--easing) infinite alternate;
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

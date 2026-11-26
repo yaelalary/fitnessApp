@@ -9,7 +9,7 @@ Sur téléphone, ajoute la page à l'écran d'accueil pour l'ouvrir comme une ap
 ## Fonctionnalités
 
 - **Exercices** : échauffement, musculation, cardio ou étirement. Pour chacun : marque (Technogym, Hammer Strength, poids libres), machine, muscles travaillés (plusieurs possibles, du grand dorsal aux deltoïdes postérieurs) et objectif par défaut (une ligne par série avec ses répétitions et sa charge, ou « Répéter » pour N séries identiques ; récupération ; durée pour le cardio). Les parcours règlent leurs séries de la même façon.
-- **Photos des machines** : la machine se choisit dans une galerie de photos, avec recherche et filtres par marque et par gamme ; la marque se remplit toute seule. La photo officielle de la machine choisie s'affiche ensuite sur l'exercice. Tu peux la remplacer par ta propre photo ou par un lien.
+- **Photos des machines** : la machine se choisit dans une galerie de photos, avec recherche et filtres par marque et par gamme ; la marque se remplit toute seule. La photo officielle de la machine choisie s'affiche ensuite sur l'exercice. Garde le doigt (ou le clic) appuyé dessus pour l'afficher en grand. Dans la fiche, un bouton sous la machine ouvre sa page sur le site du fabricant. Tu peux la remplacer par ta propre photo ou par un lien.
 - **Parcours** : ta séance type, avec les exercices dans l'ordre et un objectif pour chacun.
 - **Séances** : démarrées depuis un parcours ou en séance libre. Les charges de la dernière fois sont déjà remplies, un minuteur gère la récupération (il continue si tu changes de page, s'affiche en haut de l'écran et te prévient quand c'est fini) et tu coches chaque série faite, ou toutes d'un coup avec « Tout cocher » si tu remplis la séance après coup. Le cardio et l'échauffement se découpent en paliers (durée, et au choix : vitesse, pente, cadence, niveau). Les paliers par défaut se règlent dans la fiche de l'exercice ; chaque séance reprend ensuite ceux de la précédente. Une séance pas encore enregistrée reste sur le téléphone, même sans réseau.
 - **Statistiques** : séances par semaine, et par exercice : charge max, 1RM estimé, poids soulevé (répétitions × charge, additionnées) et répétitions (durée, distance et vitesse pour le cardio). Une section **Mesures** suit aussi tes mesures personnelles (poids, tour de taille, ou toute mesure que tu crées) avec leur courbe.
@@ -83,7 +83,7 @@ Les règles propres à chaque type d'exercice (champs, mesures statistiques, val
 - **Hammer Strength** : toutes les pages produit « strength training » du sitemap de lifefitness.com dont la marque déclarée est Hammer Strength ;
 - **Technogym** : les machines de musculation et de cardio du sitemap de technogym.com, hors produits réservés à la maison.
 
-Chaque machine garde son nom officiel, sa gamme et sa photo principale ; les photos injoignables sont écartées. Les noms utilisés par d'anciennes versions de l'app sont rattachés aux noms officiels dans `src/domain/machineCatalog.ts`. Un test vérifie qu'ils correspondent toujours à une machine du catalogue.
+Chaque machine garde son nom officiel, sa gamme, sa photo principale et l'adresse de sa page ; les photos injoignables sont écartées. Les noms utilisés par d'anciennes versions de l'app sont rattachés aux noms officiels dans `src/domain/machineCatalog.ts`. Un test vérifie qu'ils correspondent toujours à une machine du catalogue.
 
 Pour itérer sans retélécharger les quelque 650 pages, définis `CATALOG_CACHE_DIR` vers un dossier de cache.
 

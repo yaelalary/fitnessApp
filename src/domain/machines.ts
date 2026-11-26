@@ -45,11 +45,16 @@ export function machineImageUrl(brand: BrandId | null, name: string): string | n
   return findMachine(brand, name)?.imageUrl ?? null
 }
 
+export function machinePageUrl(brand: BrandId | null, name: string): string | null {
+  return findMachine(brand, name)?.pageUrl ?? null
+}
+
 export interface CatalogEntry {
   brand: BrandId
   name: string
   line: string
   imageUrl: string | null
+  pageUrl: string | null
 }
 
 export interface CatalogFilter {
@@ -59,7 +64,7 @@ export interface CatalogFilter {
 }
 
 export const CATALOG_ENTRIES: CatalogEntry[] = BRAND_ORDER.flatMap((brand) =>
-  BRANDS[brand].machines.map(({ name, line, imageUrl }) => ({ brand, name, line, imageUrl })),
+  BRANDS[brand].machines.map(({ name, line, imageUrl, pageUrl }) => ({ brand, name, line, imageUrl, pageUrl })),
 )
 
 export const CATALOG_BRANDS: BrandId[] = BRAND_ORDER.filter((brand) => BRANDS[brand].machines.length > 0)
@@ -83,7 +88,7 @@ export function findCatalogEntry(brand: BrandId | null, name: string): CatalogEn
   const brands = brand ? [brand] : BRAND_ORDER
   for (const brandId of brands) {
     const machine = findMachine(brandId, name)
-    if (machine) return { brand: brandId, name: machine.name, line: machine.line, imageUrl: machine.imageUrl }
+    if (machine) return { brand: brandId, name: machine.name, line: machine.line, imageUrl: machine.imageUrl, pageUrl: machine.pageUrl }
   }
   return null
 }
