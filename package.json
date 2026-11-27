@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "catalog": "node scripts/build-machine-catalog.mjs"
+    "catalog": "node scripts/build-machine-catalog.mjs",
+    "movements": "node scripts/build-movement-catalog.mjs"
   },
   "dependencies": {
     "chart.js": "^4.6.1",

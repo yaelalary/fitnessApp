@@ -203,6 +203,7 @@ export function exerciseFromEntry(entry: SessionEntry): Exercise {
     settings: settingsUsedIn(entry.intervals),
     notes: '',
     image: null,
+    movementId: null,
     defaults: { sets: entry.sets.length, reps: 0, weightKg: 0, restSeconds: entry.restSeconds, durationMinutes: entry.durationMinutes },
   }
 }

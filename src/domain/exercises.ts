@@ -24,6 +24,7 @@ export function createExercise(category: CategoryId = 'strength'): Exercise {
     settings: [],
     notes: '',
     image: null,
+    movementId: null,
     defaults: { ...CATEGORIES[category].defaults },
   }
 }

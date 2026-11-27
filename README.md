@@ -10,6 +10,7 @@ Sur téléphone, ajoute la page à l'écran d'accueil pour l'ouvrir comme une ap
 
 - **Exercices** : échauffement, musculation, cardio ou étirement. Pour chacun : marque (Technogym, Hammer Strength, poids libres), machine, muscles travaillés (plusieurs possibles, du grand dorsal aux deltoïdes postérieurs) et objectif par défaut (une ligne par série avec ses répétitions et sa charge, ou « Répéter » pour N séries identiques ; récupération ; durée pour le cardio). Les parcours règlent leurs séries de la même façon.
 - **Photos des machines** : la machine se choisit dans une galerie de photos, avec recherche et filtres par marque et par gamme ; la marque se remplit toute seule. La photo officielle de la machine choisie s'affiche ensuite sur l'exercice. Garde le doigt (ou le clic) appuyé dessus pour l'afficher en grand. Dans la fiche, un bouton sous la machine ouvre sa page sur le site du fabricant. Tu peux la remplacer par ta propre photo ou par un lien.
+- **Démonstrations** : chaque exercice reçoit automatiquement une démonstration du mouvement (images de départ et d'arrivée, consignes en anglais), trouvée d'après le nom de la machine ou de l'exercice dans une base de 870 mouvements. Dans la fiche, tu peux en choisir une autre ou la retirer ; en séance, « Voir le mouvement » l'affiche.
 - **Parcours** : ta séance type, avec les exercices dans l'ordre et un objectif pour chacun.
 - **Séances** : démarrées depuis un parcours ou en séance libre. Les charges de la dernière fois sont déjà remplies, un minuteur gère la récupération (il continue si tu changes de page, s'affiche en haut de l'écran et te prévient quand c'est fini) et tu coches chaque série faite, ou toutes d'un coup avec « Tout cocher » si tu remplis la séance après coup. Le cardio et l'échauffement se découpent en paliers (durée, et au choix : vitesse, pente, cadence, niveau). Les paliers par défaut se règlent dans la fiche de l'exercice ; chaque séance reprend ensuite ceux de la précédente. Une séance pas encore enregistrée reste sur le téléphone, même sans réseau.
 - **Statistiques** : séances par semaine, et par exercice : charge max, 1RM estimé, poids soulevé (répétitions × charge, additionnées) et répétitions (durée, distance et vitesse pour le cardio). Une section **Mesures** suit aussi tes mesures personnelles (poids, tour de taille, ou toute mesure que tu crées) avec leur courbe.
@@ -58,6 +59,7 @@ npm run dev      # serveur local
 npm test         # tests de la logique métier
 npm run build    # vérification des types et build de production dans dist/
 npm run catalog  # régénère le catalogue des machines depuis les sites des fabricants
+npm run movements  # régénère la base des démonstrations depuis free-exercise-db
 ```
 
 Stack : Vue 3, TypeScript, Vite, Pinia, Vue Router, Chart.js et Vitest.
@@ -113,3 +115,5 @@ Le gist contient :
 ## Crédits
 
 Les photos des machines appartiennent à leurs fabricants : [Technogym](https://www.technogym.com) et [Hammer Strength / Life Fitness](https://www.lifefitness.com). L'app les affiche par lien depuis leurs sites, sans les copier dans le dépôt.
+
+Les démonstrations des mouvements (images et consignes) viennent de [free-exercise-db](https://github.com/yuhonas/free-exercise-db), dans le domaine public (Unlicense). Les images sont affichées par lien depuis ce dépôt.

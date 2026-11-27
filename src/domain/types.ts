@@ -29,6 +29,7 @@ export interface Exercise {
   settings: CardioSettingId[]
   notes: string
   image: string | null
+  movementId: string | null
   defaults: ExerciseTargets
 }
 

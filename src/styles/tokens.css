@@ -39,6 +39,7 @@
   --thumb-size-sm: 3rem;
   --thumb-size-md: 4.5rem;
   --thumb-size-lg: 14rem;
+  --image-ratio-wide: 3 / 2;
   --chart-height: 16rem;
   --field-min-width: 9.5rem;
   --compact-field-min-width: 4.5rem;

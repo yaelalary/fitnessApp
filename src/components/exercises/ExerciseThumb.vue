@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 
-const props = withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' | 'square' }>(), { size: 'md' })
+const props = withDefaults(defineProps<{ src: string | null; alt: string; size?: 'sm' | 'md' | 'lg' | 'square' | 'wide' }>(), { size: 'md' })
 
 const loaded = ref(false)
 const failed = ref(false)
@@ -81,5 +81,10 @@ const loading = computed(() => showsImage.value && !loaded.value)
 .thumb--square {
   width: 100%;
   aspect-ratio: 1;
+}
+
+.thumb--wide {
+  width: 100%;
+  aspect-ratio: var(--image-ratio-wide);
 }
 </style>

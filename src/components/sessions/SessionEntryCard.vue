@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { Exercise, SessionEntry, SetLog } from '@/domain/types'
 import { categoryOf } from '@/domain/categories'
 import { setNounTitle } from '@/domain/setNouns'
@@ -13,6 +13,9 @@ import ApplyToExerciseButton, { type ExerciseUpdateProps } from '@/components/ex
 import ExerciseSummary from '@/components/exercises/ExerciseSummary.vue'
 import RestTimer from './RestTimer.vue'
 import IntervalsEditor from './IntervalsEditor.vue'
+import MovementDialog from '@/components/movements/MovementDialog.vue'
+import { resolveMovement } from '@/domain/movements'
+import { useMovementCatalog } from '@/composables/useMovementCatalog'
 import SetRow from './SetRow.vue'
 
 const props = defineProps<{
@@ -31,6 +34,13 @@ const config = computed(() => categoryOf(props.entry.category))
 const addSetLabel = computed(() => setNounTitle(config.value.setNoun))
 const previousSummary = computed(() => (props.previous ? describePerformance(props.previous) : ''))
 const complete = computed(() => isEntryComplete(props.entry))
+const demoOpen = ref(false)
+const { movements, ensureLoaded } = useMovementCatalog()
+const movement = computed(() => resolveMovement(movements.value, props.exercise))
+
+onMounted(() => {
+  void ensureLoaded()
+})
 const instructions = computed(() => [props.exercise.notes.trim(), props.routineNote ?? ''].filter((note) => note !== ''))
 
 function patch(changes: Partial<SessionEntry>) {
@@ -49,6 +59,10 @@ function patchSet(index: number, changes: Partial<SetLog>) {
     </ExerciseSummary>
     <p v-if="previousSummary" class="small muted">Dernière fois : {{ previousSummary }}</p>
     <p v-for="note in instructions" :key="note" class="small notes">{{ note }}</p>
+    <div v-if="movement">
+      <AppButton size="sm" variant="ghost" icon="play" @click="demoOpen = true">Voir le mouvement</AppButton>
+      <MovementDialog :open="demoOpen" :movement="movement" :title="exercise.name" @close="demoOpen = false" />
+    </div>
 
     <template v-if="config.tracking === 'sets'">
       <ol class="stack">

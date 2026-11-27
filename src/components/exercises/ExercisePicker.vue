@@ -4,6 +4,7 @@ import type { CategoryId, Exercise, ImageStore } from '@/domain/types'
 import { describeTargets, filterExercises } from '@/domain/exercises'
 import { exerciseImageSrc } from '@/domain/images'
 import AppButton from '@/components/ui/AppButton.vue'
+import PickButton from '@/components/ui/PickButton.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ExerciseFilters from './ExerciseFilters.vue'
 import ExerciseSummary from './ExerciseSummary.vue'
@@ -36,26 +37,16 @@ function create() {
     <p v-else-if="rows.length === 0" class="muted">Aucun exercice ne correspond.</p>
     <ul v-else class="stack">
       <li v-for="row in rows" :key="row.exercise.id">
-        <button type="button" class="pick" @click="emit('pick', row.exercise)">
-          <ExerciseSummary :exercise="row.exercise" :image-src="row.imageSrc" :detail="row.detail" />
-        </button>
+        <PickButton @pick="emit('pick', row.exercise)">
+          <ExerciseSummary class="picked" :exercise="row.exercise" :image-src="row.imageSrc" :detail="row.detail" />
+        </PickButton>
       </li>
     </ul>
   </div>
 </template>
 
 <style scoped>
-.pick {
-  width: 100%;
-  padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  text-align: left;
-  cursor: pointer;
-}
-
-.pick:hover {
-  border-color: var(--color-border-strong);
+.picked {
+  flex: 1;
 }
 </style>

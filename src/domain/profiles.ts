@@ -63,6 +63,7 @@ function normalizeExercise(value: unknown): Exercise {
     settings: normalizeCardioSettings(raw.settings),
     notes: asString(raw.notes),
     image: typeof raw.image === 'string' ? raw.image : null,
+    movementId: typeof raw.movementId === 'string' && raw.movementId !== '' ? raw.movementId : null,
     defaults: normalizeTargets(raw.defaults),
   }
 }

@@ -6,6 +6,7 @@ export const ICON_PATHS = {
   up: ['M6 15l6-6 6 6'],
   down: ['M6 9l6 6 6-6'],
   back: ['M15 6l-6 6 6 6'],
+  forward: ['M9 6l6 6-6 6'],
   trash: ['M4 7h16', 'M9 7V4h6v3', 'M6 7l1 13h10l1-13'],
   edit: ['M4 20h4L19 9l-4-4L4 16v4z', 'M13 7l4 4'],
   timer: ['M12 8v5l3 2', 'M9 2h6', 'M12 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16z'],

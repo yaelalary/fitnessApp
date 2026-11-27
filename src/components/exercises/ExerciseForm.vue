@@ -16,6 +16,7 @@ import SegmentedControl, { type SegmentOption } from '@/components/ui/SegmentedC
 import ImagePicker from './ImagePicker.vue'
 import MachineField from './MachineField.vue'
 import TargetsEditor from './TargetsEditor.vue'
+import MovementField from '@/components/movements/MovementField.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -45,7 +46,7 @@ function replaceDraft(draft: Exercise) {
   emit('update:draft', draft)
 }
 
-function draftField<K extends 'name' | 'machine' | 'muscles' | 'defaults' | 'notes'>(key: K) {
+function draftField<K extends 'name' | 'machine' | 'muscles' | 'defaults' | 'notes' | 'movementId'>(key: K) {
   return computed<Exercise[K]>({
     get: () => props.draft[key],
     set: (value) => replaceDraft({ ...props.draft, [key]: value }),
@@ -61,6 +62,13 @@ const settings = computed<CardioSettingId[]>({
 })
 const defaults = draftField('defaults')
 const notes = draftField('notes')
+const movementId = draftField('movementId')
+const movementSubject = computed(() => ({
+  name: props.draft.name,
+  machine: props.draft.machine,
+  category: props.draft.category,
+  brand: props.draft.brand,
+}))
 const image = computed<ImageInput>({
   get: () => props.image,
   set: (value) => emit('update:image', value),
@@ -103,7 +111,7 @@ function pickMachine(entry: CatalogEntry) {
       <div v-if="machinePage">
         <AppButton :href="machinePage" size="sm" icon="external">Voir la machine sur le site du fabricant</AppButton>
       </div>
-      <FormField v-slot="field" label="Marque" hint="Remplie toute seule quand tu choisis une machine du catalogue.">
+      <FormField v-slot="field" label="Marque">
         <select :id="field.id" :value="draft.brand ?? ''" :aria-describedby="field.describedBy" @change="setBrand">
           <option value="">Aucune</option>
           <option v-for="brandId in BRAND_ORDER" :key="brandId" :value="brandId">{{ BRANDS[brandId].label }}</option>
@@ -111,7 +119,7 @@ function pickMachine(entry: CatalogEntry) {
       </FormField>
     </div>
 
-    <FormField v-slot="field" label="Muscles travaillés" hint="Plusieurs choix possibles.">
+    <FormField v-slot="field" label="Muscles travaillés">
       <MultiSelect
         :id="field.id"
         v-model="muscles"
@@ -136,6 +144,11 @@ function pickMachine(entry: CatalogEntry) {
     <section class="stack">
       <h2 class="section-title">Objectif par défaut</h2>
       <TargetsEditor v-model:targets="defaults" :category="draft.category" :settings="draft.settings" :errors="errors" />
+    </section>
+
+    <section class="stack">
+      <h2 class="section-title">Comment faire le mouvement</h2>
+      <MovementField v-model="movementId" :subject="movementSubject" />
     </section>
 
     <section class="stack">
