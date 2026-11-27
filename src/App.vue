@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
 import { useWorkoutStore } from '@/stores/workout'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useHandednessAttribute } from '@/composables/useHandednessAttribute'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppNav from '@/components/layout/AppNav.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -24,6 +25,7 @@ const workout = useWorkoutStore()
 const creation = useAsyncAction()
 const refill = useRefillStore()
 const rest = useRestStore()
+useHandednessAttribute()
 
 const restBannerSessionId = computed(() => {
   const sessionId = rest.sessionId

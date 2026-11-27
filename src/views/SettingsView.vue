@@ -8,6 +8,7 @@ import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import ProfilesManager from '@/components/profiles/ProfilesManager.vue'
 import GistSettings from '@/components/settings/GistSettings.vue'
+import HandednessSettings from '@/components/settings/HandednessSettings.vue'
 
 const settings = useSettingsStore()
 const workout = useWorkoutStore()
@@ -66,6 +67,11 @@ async function disconnect() {
         @rename="renameProfile"
         @remove="removeProfile"
       />
+    </section>
+
+    <section class="stack">
+      <h2 class="section-title">Affichage</h2>
+      <HandednessSettings :model-value="settings.handedness" @update:model-value="settings.setHandedness" />
     </section>
 
     <section class="stack">

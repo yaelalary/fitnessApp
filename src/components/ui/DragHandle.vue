@@ -40,6 +40,10 @@ function onKeydown(event: KeyboardEvent) {
   touch-action: none;
 }
 
+:global([data-handedness='left'] .drag-handle) {
+  order: -1;
+}
+
 .drag-handle:hover {
   background: var(--color-surface-sunken);
   color: var(--color-text);
