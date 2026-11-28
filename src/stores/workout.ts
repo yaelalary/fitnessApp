@@ -4,7 +4,7 @@ import type { Exercise, ExerciseTargets, FileChanges, ImageStore, Measure, Profi
 import { applyTargetsToExercise } from '@/domain/exerciseDefaults'
 import { findById, indexById, removeById, upsertById } from '@/domain/collections'
 import { sortExercises } from '@/domain/exercises'
-import { removeExerciseFromRoutines } from '@/domain/routines'
+import { addSessionExercisesToRoutine, removeExerciseFromRoutines } from '@/domain/routines'
 import { sortSessionsDesc } from '@/domain/sessions'
 import { createProfile, touchProfile } from '@/domain/profiles'
 import { planImageChange, releaseImage, storedFileOf, type ImageInput } from '@/domain/images'
@@ -128,6 +128,12 @@ export const useWorkoutStore = defineStore('workout', () => {
     await updateActiveProfile((profile) => ({ ...profile, routines: upsertById(profile.routines, saved) }))
   }
 
+  async function addSessionExercisesToItsRoutine(session: Session) {
+    const routine = session.routineId ? findById(requireActiveProfile().routines, session.routineId) : undefined
+    if (!routine) throw new Error('Ce parcours n’existe plus.')
+    await saveRoutine(addSessionExercisesToRoutine(routine, session, exercisesById.value))
+  }
+
   async function deleteRoutine(routineId: string) {
     await updateActiveProfile((profile) => ({ ...profile, routines: removeById(profile.routines, routineId) }))
   }
@@ -205,6 +211,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     deleteMeasure,
     deleteExercise,
     saveRoutine,
+    addSessionExercisesToItsRoutine,
     deleteRoutine,
     saveSession,
     deleteSession,

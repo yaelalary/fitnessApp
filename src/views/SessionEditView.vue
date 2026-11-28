@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import type { Exercise, SessionEntry } from '@/domain/types'
 import { hasSameTargets, targetsFromEntry } from '@/domain/exerciseDefaults'
 import { exerciseFromEntry, hasPendingEntries } from '@/domain/sessions'
-import { routineItemNote } from '@/domain/routines'
+import { exercisesMissingFromRoutine, routineItemNote } from '@/domain/routines'
 import { findById } from '@/domain/collections'
 import { exerciseImageSrc } from '@/domain/images'
 import { formatLongDate } from '@/domain/dates'
@@ -22,6 +22,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import AddExerciseDialog from '@/components/exercises/AddExerciseDialog.vue'
 import SessionEntryCard from '@/components/sessions/SessionEntryCard.vue'
 import SortableList from '@/components/ui/SortableList.vue'
+import RoutineUpdatePrompt from '@/components/sessions/RoutineUpdatePrompt.vue'
 
 const props = defineProps<{ id: string }>()
 
@@ -33,11 +34,23 @@ const { busy, error, run } = useAsyncAction()
 const pickerOpen = ref(false)
 const confirm = useConfirm()
 const exerciseDefaults = useExerciseDefaultsUpdate()
+const routineUpdate = useAsyncAction()
 
 const routine = computed(() => {
   const routineId = session.value?.routineId
   return routineId ? (findById(workout.routines, routineId) ?? null) : null
 })
+const missingFromRoutine = computed(() =>
+  routine.value && session.value ? exercisesMissingFromRoutine(routine.value, session.value, workout.exercisesById) : [],
+)
+const missingNames = computed(() => missingFromRoutine.value.map((exercise) => exercise.name))
+const showsRoutineUpdate = computed(() => missingFromRoutine.value.length > 0)
+
+function updateRoutine() {
+  const current = session.value
+  if (current) void routineUpdate.run(() => workout.addSessionExercisesToItsRoutine(current))
+}
+
 function exerciseUpdateFor(entry: SessionEntry) {
   const exercise = workout.exercisesById.get(entry.exerciseId)
   if (!exercise) return null
@@ -177,6 +190,15 @@ async function remove() {
       </SortableList>
 
       <AppButton icon="plus" block @click="pickerOpen = true">Ajouter un exercice</AppButton>
+
+      <RoutineUpdatePrompt
+        v-if="showsRoutineUpdate && routine"
+        :routine-name="routine.name"
+        :missing-names="missingNames"
+        :busy="routineUpdate.busy.value"
+        :error="routineUpdate.error.value"
+        @apply="updateRoutine"
+      />
 
       <FormField v-slot="field" label="Notes de séance">
         <textarea
