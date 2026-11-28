@@ -66,12 +66,17 @@ export interface ActivitySummary {
   cardioMinutes: number
 }
 
-export function recentActivity(sessions: readonly Session[], today: string, days: number): ActivitySummary {
-  const recent = sessions.filter((session) => {
+export const RECENT_DAYS = 30
+
+export function sessionsWithinDays(sessions: readonly Session[], today: string, days: number): Session[] {
+  return sessions.filter((session) => {
     const age = daysBetween(session.date, today)
     return age >= 0 && age < days
   })
-  return recent.reduce<ActivitySummary>(
+}
+
+export function recentActivity(sessions: readonly Session[], today: string, days: number): ActivitySummary {
+  return sessionsWithinDays(sessions, today, days).reduce<ActivitySummary>(
     (summary, session) => {
       const sessionSummary = summarizeSession(session)
       return {

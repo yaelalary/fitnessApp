@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import type { MetricId } from '@/domain/metrics'
 import { METRICS } from '@/domain/metrics'
 import { categoryOf } from '@/domain/categories'
-import { buildProgression, exercisesWithHistory, recentActivity, summarizeProgression, weeklySessionCounts } from '@/domain/stats'
+import { buildProgression, exercisesWithHistory, RECENT_DAYS, recentActivity, summarizeProgression, weeklySessionCounts } from '@/domain/stats'
 import { todayIso } from '@/domain/dates'
 import { formatNumber, formatSignedPercent, formatWithUnit } from '@/domain/numbers'
 import { useWorkoutStore } from '@/stores/workout'
@@ -16,10 +16,10 @@ import ProgressChart from '@/components/stats/ProgressChart.vue'
 import ProgressTable from '@/components/stats/ProgressTable.vue'
 import WeeklyChart from '@/components/stats/WeeklyChart.vue'
 import ActivityTiles from '@/components/stats/ActivityTiles.vue'
+import FunFactsSection from '@/components/stats/FunFactsSection.vue'
 import MeasuresSection from '@/components/measures/MeasuresSection.vue'
 
 const WEEKS_SHOWN = 12
-const RECENT_DAYS = 30
 
 const workout = useWorkoutStore()
 
@@ -73,6 +73,8 @@ const summaryTiles = computed(() => {
         message="Enregistre quelques séances : tes charges, répétitions et ta régularité apparaîtront ici."
       />
       <template v-else>
+        <FunFactsSection :sessions="workout.sessions" :today="today" />
+
         <section class="stack">
           <h2 class="section-title">{{ activityTitle }}</h2>
           <ActivityTiles :activity="activity" />

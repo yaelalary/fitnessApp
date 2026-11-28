@@ -92,3 +92,14 @@ export function formatDuration(totalMinutes: number): string {
   const totalSeconds = Math.round(totalMinutes * SECONDS_PER_MINUTE)
   return totalSeconds > 0 ? formatRest(totalSeconds) : ''
 }
+
+const MINUTES_PER_HOUR = 60
+
+export function formatHoursAndMinutes(totalMinutes: number): string {
+  const rounded = Math.round(totalMinutes)
+  const hours = Math.floor(rounded / MINUTES_PER_HOUR)
+  const minutes = rounded % MINUTES_PER_HOUR
+  if (hours === 0) return `${minutes} min`
+  if (minutes === 0) return `${hours} h`
+  return `${hours} h ${String(minutes).padStart(2, '0')}`
+}
