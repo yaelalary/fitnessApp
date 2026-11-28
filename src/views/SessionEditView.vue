@@ -87,6 +87,7 @@ function moveBy(row: Row, offset: -1 | 1) {
 const canCompleteAll = computed(() => (session.value ? hasPendingEntries(session.value) : false))
 const discardLabel = computed(() => (saved.value ? 'Annuler les modifications' : 'Abandonner'))
 const canDiscard = computed(() => hasUnsavedChanges.value)
+const saveLabel = computed(() => (saved.value ? 'Enregistrer' : 'Terminer la séance'))
 
 function fieldValue(event: Event): string {
   return (event.target as HTMLInputElement | HTMLTextAreaElement).value
@@ -213,7 +214,7 @@ async function remove() {
 
       <div class="sticky-actions">
         <AppButton v-if="canDiscard" variant="ghost" :disabled="busy" @click="discard">{{ discardLabel }}</AppButton>
-        <AppButton variant="primary" icon="check" :loading="busy" @click="save">Enregistrer</AppButton>
+        <AppButton variant="primary" icon="check" :loading="busy" @click="save">{{ saveLabel }}</AppButton>
       </div>
     </template>
 

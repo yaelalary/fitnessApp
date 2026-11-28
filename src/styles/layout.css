@@ -109,6 +109,7 @@
   bottom: calc(var(--nav-height) + var(--safe-bottom) + var(--space-3));
   z-index: var(--z-sticky);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
@@ -118,7 +119,8 @@
 }
 
 .sticky-actions > * {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: max-content;
 }
 
 dialog .sticky-actions {
