@@ -17,6 +17,7 @@ import MovementDialog from '@/components/movements/MovementDialog.vue'
 import { resolveMovement } from '@/domain/movements'
 import { useMovementCatalog } from '@/composables/useMovementCatalog'
 import SetRow from './SetRow.vue'
+import { entryAnchorId } from '@/router/sessionLinks'
 
 const props = defineProps<{
   sessionId: string
@@ -35,6 +36,7 @@ const addSetLabel = computed(() => setNounTitle(config.value.setNoun))
 const previousSummary = computed(() => (props.previous ? describePerformance(props.previous) : ''))
 const complete = computed(() => isEntryComplete(props.entry))
 const demoOpen = ref(false)
+const anchorId = computed(() => entryAnchorId(props.entry.id))
 const { movements, ensureLoaded } = useMovementCatalog()
 const movement = computed(() => resolveMovement(movements.value, props.exercise))
 
@@ -53,7 +55,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
 </script>
 
 <template>
-  <article class="card stack entry" :class="{ 'entry--complete': complete }">
+  <article :id="anchorId" class="card stack entry" :class="{ 'entry--complete': complete }">
     <ExerciseSummary :exercise="exercise" :image-src="imageSrc" zoomable>
       <DragHandle :item-label="exercise.name" @move="emit('move', $event)" />
     </ExerciseSummary>
@@ -106,6 +108,7 @@ function patchSet(index: number, changes: Partial<SetLog>) {
 
 <style scoped>
 .entry {
+  scroll-margin-top: calc(var(--header-height) + var(--space-3));
   transition: border-color var(--duration-medium) var(--easing);
 }
 

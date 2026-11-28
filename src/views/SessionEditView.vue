@@ -13,6 +13,7 @@ import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useSessionEditor } from '@/composables/useSessionEditor'
 import { useConfirm } from '@/composables/useConfirm'
 import { useExerciseDefaultsUpdate } from '@/composables/useExerciseDefaultsUpdate'
+import { useScrollToFocusedEntry } from '@/composables/useScrollToFocusedEntry'
 import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmActionDialog from '@/components/ui/ConfirmActionDialog.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -35,6 +36,7 @@ const pickerOpen = ref(false)
 const confirm = useConfirm()
 const exerciseDefaults = useExerciseDefaultsUpdate()
 const routineUpdate = useAsyncAction()
+useScrollToFocusedEntry()
 
 const routine = computed(() => {
   const routineId = session.value?.routineId

@@ -25,6 +25,7 @@ export const useRestStore = defineStore('rest', () => {
   const remainingSeconds = computed(() => countdownRemainingSeconds(rest.value?.run ?? null, now.value))
   const sessionId = computed(() => (running.value ? (rest.value?.sessionId ?? null) : null))
   const exerciseName = computed(() => rest.value?.exerciseName ?? '')
+  const entryId = computed(() => rest.value?.entryId ?? null)
 
   function start(request: RestStart) {
     refresh()
@@ -43,5 +44,5 @@ export const useRestStore = defineStore('rest', () => {
     if (restBelongsTo(rest.value, session)) stop()
   }
 
-  return { running, remainingSeconds, sessionId, exerciseName, start, stop, isRunningFor, stopForSession }
+  return { running, remainingSeconds, sessionId, entryId, exerciseName, start, stop, isRunningFor, stopForSession }
 })

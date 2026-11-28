@@ -62,6 +62,7 @@ onMounted(() => workout.load())
     <RestBanner
       v-if="restBannerSessionId"
       :session-id="restBannerSessionId"
+      :entry-id="rest.entryId"
       :exercise-name="rest.exerciseName"
       :remaining-seconds="rest.remainingSeconds"
       @stop="rest.stop"

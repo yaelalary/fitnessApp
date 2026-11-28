@@ -1,9 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import './tabs'
+import { focusedEntryId } from './sessionLinks'
 
 export const router = createRouter({
   history: createWebHashHistory(),
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior: (to) => (focusedEntryId(to.query) ? false : { top: 0 }),
   routes: [
     { path: '/', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { tab: 'home', requiresProfile: true } },
     {
